@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity">
+
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/cc"
+        android:id="@+id/ivLogo"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_below="@id/ivLogo"
+        android:id="@+id/text"
+        android:text="@string/login_with"
+        android:layout_marginTop="32dp"
+        android:layout_centerHorizontal="true"
+        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_below="@id/text"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="10"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/superhero1"
+                android:layout_width="0dp"
+                android:layout_weight="5"
+                android:text="@string/superhero1"
+                android:textColor="@color/primaryTextColor"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_marginStart="16dp"
+                android:background="@drawable/button_background"
+                android:layout_marginEnd="8dp"
+                android:layout_height="wrap_content" />
+
+
+            <Button
+                android:id="@+id/superhero2"
+                android:layout_width="0dp"
+                android:layout_weight="5"
+                android:layout_marginEnd="16dp"
+                android:text="@string/superhero2"
+                android:textColor="@color/primaryTextColor"
+                style="?android:attr/borderlessButtonStyle"
+                android:background="@drawable/button_background"
+                android:layout_marginStart="8dp"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="10"
+            android:layout_marginTop="32dp"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/superhero3"
+                android:layout_width="0dp"
+                android:layout_weight="5"
+                style="?android:attr/borderlessButtonStyle"
+                android:background="@drawable/button_background"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/superhero3"
+                android:textColor="@color/primaryTextColor"
+                android:layout_height="wrap_content" />
+
+
+            <Button
+                android:id="@+id/superhero4"
+                android:layout_width="0dp"
+                android:layout_weight="5"
+                style="?android:attr/borderlessButtonStyle"
+                android:background="@drawable/button_background"
+                android:textColor="@color/primaryTextColor"
+                android:layout_marginEnd="16dp"
+                android:text="@string/superhero4"
+                android:layout_marginStart="8dp"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+
+</RelativeLayout>
