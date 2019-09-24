@@ -2,8 +2,6 @@ package com.inscripts.cometchatpro;
 
 class Constant {
 
-    static final String REGION = "us";
-
     static final String BROADCAST_FILTER = "broadcast_filter";
 
     static final String ACTION_CALL = "action_call";

@@ -12,7 +12,6 @@ import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
-import com.cometchat.pro.helpers.CometChatHelper;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.pushnotifications.core.PNExtension;
@@ -21,8 +20,6 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.ArrayList;
-
 import static com.inscripts.cometchatpro.Constant.APP_ID;
 
 
@@ -62,26 +59,24 @@ public class MyFirebaseService extends FirebaseMessagingService {
             Log.d(TAG, "JSONObject: "+json.toString());
             JSONObject messageData = new JSONObject(json.getString("message"));
 
-//            PNExtension.getMessageFromJson(new JSONObject(remoteMessage.getData().get("message")), new CometChat.CallbackListener<BaseMessage>() {
-//                @Override
-//                public void onSuccess(BaseMessage baseMessage) {
-//
-//
-//                }
-//                @Override
-//                public void onError(CometChatException e) {
-//                    Log.d(TAG, "onError: "+e.getMessage());
-//                }
-//            });
+            PNExtension.getMessageFromJson(new JSONObject(remoteMessage.getData().get("message")), new CometChat.CallbackListener<BaseMessage>() {
+                @Override
+                public void onSuccess(BaseMessage baseMessage) {
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    if (baseMessage instanceof Call){
+                        isCall=true;
+                    }
+                    showNotifcation(pendingIntent);
+                }
+                @Override
+                public void onError(CometChatException e) {
+                    Log.d(TAG, "onError: "+e.getMessage());
+                }
+            });
 
-            BaseMessage baseMessage=CometChatHelper.processMessage(new JSONObject(remoteMessage.getData().get("message")));
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            if (baseMessage instanceof Call){
-                isCall=true;
-            }
-            showNotifcation(pendingIntent);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

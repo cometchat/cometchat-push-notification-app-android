@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendMessage(String message) {
 
-        TextMessage textMessage = new TextMessage(receiverId,message,receiverType);
+        TextMessage textMessage = new TextMessage(receiverId,message,CometChatConstants.MESSAGE_TYPE_TEXT,receiverType);
 
         CometChat.sendMessage(textMessage, new CometChat.CallbackListener<TextMessage>() {
             @Override

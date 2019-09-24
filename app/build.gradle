@@ -37,7 +37,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     //cometchat sdk
-    implementation 'com.cometchat:pro-android-chat-sdk:2.0.0-beta1'
+    implementation 'com.cometchat:pro-android-chat-sdk:1.8.6'
 
     implementation 'com.google.firebase:firebase-core:16.0.8'
 
