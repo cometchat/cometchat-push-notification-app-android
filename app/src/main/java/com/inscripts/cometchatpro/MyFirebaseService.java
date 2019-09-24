@@ -7,7 +7,6 @@ import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
-
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
@@ -15,7 +14,6 @@ import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.helpers.CometChatHelper;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.Group;
-import com.cometchat.pro.pushnotifications.core.PNExtension;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -60,19 +58,6 @@ public class MyFirebaseService extends FirebaseMessagingService {
         try {
             json = new JSONObject(remoteMessage.getData());
             Log.d(TAG, "JSONObject: "+json.toString());
-            JSONObject messageData = new JSONObject(json.getString("message"));
-
-//            PNExtension.getMessageFromJson(new JSONObject(remoteMessage.getData().get("message")), new CometChat.CallbackListener<BaseMessage>() {
-//                @Override
-//                public void onSuccess(BaseMessage baseMessage) {
-//
-//
-//                }
-//                @Override
-//                public void onError(CometChatException e) {
-//                    Log.d(TAG, "onError: "+e.getMessage());
-//                }
-//            });
 
             BaseMessage baseMessage=CometChatHelper.processMessage(new JSONObject(remoteMessage.getData().get("message")));
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
