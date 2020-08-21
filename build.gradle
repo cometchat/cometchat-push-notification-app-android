@@ -7,8 +7,9 @@ buildscript {
         
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
-        classpath 'com.google.gms:google-services:4.0.1'
+        classpath 'com.android.tools.build:gradle:3.5.2'
+        classpath 'com.google.gms:google-services:4.3.3'
+
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -18,10 +19,12 @@ allprojects {
     repositories {
         google()
         jcenter()
+
         maven {
             url "https://dl.bintray.com/cometchat/pro"
         }
-        maven {url "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases"}
+        maven { url "https://jitpack.io" }
+        
     }
 }
 

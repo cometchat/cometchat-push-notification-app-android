@@ -1,106 +1,118 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    android:orientation="vertical"
+    android:fillViewport="true">
 
-    <ImageView
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:src="@drawable/cc"
-        android:id="@+id/ivLogo"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:layout_below="@id/ivLogo"
-        android:id="@+id/text"
-        android:text="@string/login_with"
-        android:layout_marginTop="32dp"
-        android:layout_centerHorizontal="true"
-        android:textColor="@android:color/black"
-        android:textSize="20sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_below="@id/text"
-        android:layout_marginTop="16dp"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:padding="4dp"
+            android:text="SignIn"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="40sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvTitle"
+            android:id="@+id/tvDes1"
+            android:layout_marginStart="16dp"
+            android:padding="4dp"
+            android:text="Welcome to CometChat"
+            android:textColor="@color/colorPrimary"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvDes1"
+            android:id="@+id/tvDes2"
+            android:layout_marginStart="16dp"
+            android:padding="4dp"
+            android:text="Please Enter UID to Continue"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <RelativeLayout
+            android:animateLayoutChanges="true"
+            android:layout_below="@id/tvDes2"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="56dp"
+            android:layout_marginEnd="32dp"
             android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:weightSum="10"
             android:layout_height="wrap_content">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inputUID"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter UID"
+                android:textColorHint="@color/secondaryTextColor"
+                app:boxCornerRadiusBottomEnd="24dp"
+                app:boxCornerRadiusBottomStart="24dp"
+                app:boxCornerRadiusTopEnd="24dp"
+                app:boxCornerRadiusTopStart="24dp"
+                app:boxStrokeColor="@color/secondaryTextColor"
+                app:boxStrokeWidth="1dp"
+                app:endIconDrawable="@drawable/ic_arrow_right_24dp"
+                app:endIconMode="custom"
+                app:endIconTint="@color/primaryTextColor">
 
-            <Button
-                android:id="@+id/superhero1"
-                android:layout_width="0dp"
-                android:layout_weight="5"
-                android:text="@string/superhero1"
-                android:textColor="@color/primaryTextColor"
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_marginStart="16dp"
-                android:background="@drawable/button_background"
-                android:layout_marginEnd="8dp"
-                android:layout_height="wrap_content" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etUID"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:maxLines="1"
+                android:inputType="text"
+                android:imeOptions="actionDone"
+                android:textColor="@color/primaryTextColor" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <ProgressBar
+                android:id="@+id/loginProgress"
+                android:visibility="gone"
+                android:indeterminateTint="@color/primaryTextColor"
+                android:layout_alignEnd="@+id/inputUID"
+                android:layout_alignBottom="@+id/inputUID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
-
-            <Button
-                android:id="@+id/superhero2"
-                android:layout_width="0dp"
-                android:layout_weight="5"
-                android:layout_marginEnd="16dp"
-                android:text="@string/superhero2"
-                android:textColor="@color/primaryTextColor"
-                style="?android:attr/borderlessButtonStyle"
-                android:background="@drawable/button_background"
-                android:layout_marginStart="8dp"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
+        </RelativeLayout>
         <LinearLayout
-            android:layout_width="match_parent"
+            android:gravity="center"
             android:orientation="horizontal"
-            android:weightSum="10"
-            android:layout_marginTop="32dp"
+            android:layout_width="match_parent"
+            android:layout_marginBottom="16dp"
+            android:layout_alignParentBottom="true"
             android:layout_height="wrap_content">
-
-            <Button
-                android:id="@+id/superhero3"
-                android:layout_width="0dp"
-                android:layout_weight="5"
-                style="?android:attr/borderlessButtonStyle"
-                android:background="@drawable/button_background"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="8dp"
-                android:text="@string/superhero3"
-                android:textColor="@color/primaryTextColor"
-                android:layout_height="wrap_content" />
-
-
-            <Button
-                android:id="@+id/superhero4"
-                android:layout_width="0dp"
-                android:layout_weight="5"
-                style="?android:attr/borderlessButtonStyle"
-                android:background="@drawable/button_background"
-                android:textColor="@color/primaryTextColor"
-                android:layout_marginEnd="16dp"
-                android:text="@string/superhero4"
-                android:layout_marginStart="8dp"
-                android:layout_height="wrap_content" />
-
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:text="Don't have any users?"
+                android:layout_height="wrap_content"/>
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:onClick="createUser"
+                android:text="Create Now"
+                android:textAllCaps="true"
+                android:textColor="@color/colorPrimary"
+                android:layout_marginLeft="8dp"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
+    </RelativeLayout>
 
 
-
-    </LinearLayout>
-
-</RelativeLayout>
+</ScrollView>
