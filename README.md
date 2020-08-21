@@ -32,16 +32,13 @@ CometChat Push Notification Sample App is a fully functional push notification a
    Simply Clone the project from android-java-push-notifications-app repository and open in Android Studio.
    Build the Demo App and it will be ready to Run
 
- ## Note
-
-      You need to add "google-services.json" before compiling the project.
 
 
 ## Run the Sample App
 
-To Run to sample app you have to do the following changes by Adding **APP_ID**, **API_KEY** , **REGION_CODE** and **google-services.json**
+To Run to sample app you have to do the following changes by Adding **APP_ID**, **API_KEY** , **REGION** and **google-services.json**
 
-   You can obtain your  *APP_ID*, *API_KEY* and *REGION_CODE* from [CometChat-Pro Dashboard](https://app.cometchat.io/)
+   You can obtain your  *APP_ID*, *API_KEY* and *REGION* from [CometChat-Pro Dashboard](https://app.cometchat.io/)
 
    You can Obtain your  *google-services.json* from [Firebase Console](https://console.firebase.google.com/)
 
