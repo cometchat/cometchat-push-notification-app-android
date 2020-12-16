@@ -24,8 +24,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.google.firebase.installations.FirebaseInstallations;
-import com.google.firebase.installations.InstallationTokenResult;
 
 import utils.PreferenceUtil;
 import utils.Utils;
@@ -109,29 +107,29 @@ public class LoginActivity extends AppCompatActivity {
                 if (MyFirebaseMessagingService.token==null) {
                     FirebaseInstanceId.getInstance().getInstanceId()
                             .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                            if (!task.isSuccessful()) {
-                                Toast.makeText(LoginActivity.this,task.getException().getLocalizedMessage(),Toast.LENGTH_LONG).show();
-                                return;
-                            }
-                            token = task.getResult().getToken();
-                            CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
                                 @Override
-                                public void onSuccess(String s) {
-                                    Toast.makeText(LoginActivity.this,s,Toast.LENGTH_LONG).show();
-                                    Log.e( "onSuccessPN: ",s );
-                                }
-
-                                @Override
-                                public void onError(CometChatException e) {
-                                    Log.e("onErrorPN: ",e.getMessage() );
-                                    Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                    if (!task.isSuccessful()) {
+                                        Toast.makeText(LoginActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
+                                    token = task.getResult().getToken();
                                 }
                             });
-                        }
-                    });
                 }
+                CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
+                    @Override
+                    public void onSuccess(String s) {
+                        Toast.makeText(LoginActivity.this,s,Toast.LENGTH_LONG).show();
+                        Log.e( "onSuccessPN: ",s );
+                    }
+
+                    @Override
+                    public void onError(CometChatException e) {
+                        Log.e("onErrorPN: ",e.getMessage() );
+                        Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
                 progressBar.setVisibility(View.GONE);
                 finish();
                 startActivity(new Intent(LoginActivity.this, PushNotificationActivity.class));

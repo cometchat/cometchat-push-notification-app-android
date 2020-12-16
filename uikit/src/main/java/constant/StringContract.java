@@ -150,7 +150,7 @@ public class StringContract {
 
         public static final String MAPS_URL = "https://maps.googleapis.com/maps/api/staticmap?zoom=16&size=380x220&markers=color:red|";
 
-        public static final String MAP_ACCESS_KEY = "AIzaSyAa8HeLH2lQMbPeOiMlM9D1VxZ7pbGQq8o";
+        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXX";
     }
 
 

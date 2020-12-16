@@ -22,9 +22,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.google.firebase.installations.FirebaseInstallations;
-import com.google.firebase.installations.InstallationTokenResult;
-
 import utils.PreferenceUtil;
 import utils.Utils;
 
@@ -102,25 +99,25 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<InstanceIdResult> task) {
                                     if (!task.isSuccessful()) {
-                                        Toast.makeText(MainActivity.this,task.getException().getLocalizedMessage(),Toast.LENGTH_LONG).show();
+                                        Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();
                                         return;
                                     }
                                     token = task.getResult().getToken();
-                                    CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
-                                        @Override
-                                        public void onSuccess(String s) {
-                                            Log.e(TAG, "onSuccess: "+s);
-                                        }
-
-                                        @Override
-                                        public void onError(CometChatException e) {
-                                            Log.e(TAG, "onError: "+e.getMessage());
-                                        }
-                                    });
-                                    Log.e(TAG, "onComplete: "+token);
                                 }
                             });
                 }
+                CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
+                    @Override
+                    public void onSuccess(String s) {
+                        Log.e(TAG, "onSuccess: "+s);
+                    }
+                    @Override
+                    public void onError(CometChatException e) {
+                        Log.e(TAG, "onError: "+e.getMessage());
+                    }
+                });
+                Log.e(TAG, "onComplete: "+token);
+
                 String str = uid+"_progressbar";
                 int id = getResources().getIdentifier(str,"id",getPackageName());
                 findViewById(id).setVisibility(View.GONE);
