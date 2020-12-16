@@ -14,8 +14,6 @@ CometChat Push Notification Sample App is a fully functional push notification a
 
 4. [Documentation](#documentation)
 
-5. [Contribute](#contribute)
-
 
 
 ## Pre-requisite
