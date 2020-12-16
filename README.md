@@ -8,7 +8,7 @@ CometChat Push Notification Sample App is a fully functional push notification a
 
 1. [Pre-requisite](#Pre-requisite)
 
-2. [Installation ](#installtion)
+2. [Installation ](#installation)
 
 3. [Run the Sample App ](#run-the-sample-app)
 
@@ -62,8 +62,6 @@ Build and run the Sample App.
 
 ## Note
   
-   You can Obtain your  *APP_ID* and *API_KEY* from [CometChat-Pro Dashboard](https://app.cometchat.com/)
-
    For more information read [CometChat-Pro Android SDK](https://prodocs.cometchat.com/docs/android-quick-start)
    Documentation
 
@@ -73,7 +71,4 @@ Build and run the Sample App.
 ## Documentation
    [Token Based Push Notification](https://prodocs.cometchat.com/docs/android-extensions-enhanced-push-notification)
    
-## Contribute
-
- Feel free to make Pull Request.
   
