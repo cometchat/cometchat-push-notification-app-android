@@ -1,5 +1,5 @@
 <img align="left" src="Screenshot/screenshot.png">
-CometChat Push Notification Sample App is a fully functional push notification app capable of one-on-one (private) and group messaging as well as Calling. This sample app enables users to send and receive push notifications for text and multimedia messages like **images, videos, documents as well as  Custom Messages** . Also, users can make push notifications for Audio and Video calls to other users or groups.
+CometChat Pro Push Notification Sample App is a fully functional push notification app capable of one-on-one (private) and group messaging as well as calling. This sample app enables users to send and receive push notifications for text and multimedia messages like **images, videos, documents as well as Custom Messages** . Also, users can make push notifications for Audio and Video calls to other users or groups.
 
 [![Platform](https://img.shields.io/badge/Platform-Android-brightgreen.svg)](#)      [![Platform](https://img.shields.io/badge/Language-Java-yellowgreen.svg)](#)
 
@@ -8,9 +8,9 @@ CometChat Push Notification Sample App is a fully functional push notification a
 
 1. [Pre-requisite](#Pre-requisite)
 
-2. [Installation ](#installation)
+2. [Installation](#installation)
 
-3. [Run the Sample App ](#run-the-sample-app)
+3. [Run the Sample App](#run-the-sample-app)
 
 4. [Documentation](#documentation)
 
@@ -26,27 +26,21 @@ CometChat Push Notification Sample App is a fully functional push notification a
 7. Copy the `APP_ID`, `REGION` and `AUTH_KEY` for your app.
 </br>
 
-</br>
- 
- 
 ## Installation
 
-   Simply Clone the project from android-java-push-notifications-app repository and open in Android Studio.
-   Build the Demo App and it will be ready to Run
-
+   Simply Clone the project and open in Android Studio.
+   Build the Demo App and it will be ready to Run.
 
 
 ## Run the Sample App
 
-To Run to sample app you have to do the following changes by Adding **APP_ID**, **API_KEY** , **REGION** and **google-services.json**
-
-   You can obtain your  *APP_ID*, *API_KEY* and *REGION* from [CometChat-Pro Dashboard](https://app.cometchat.io/)
+To Run the sample app you have to do the following changes by Adding **APP_ID**, **API_KEY** , **REGION** and **google-services.json**
 
    You can Obtain your  *google-services.json* from [Firebase Console](https://console.firebase.google.com/)
 
    - Open the project in Android Studio.
 
-   - Modify `APP_ID` and `API_KEY` and `REGION` with your own .
+   - Modify `APP_ID` and `API_KEY` and `REGION` with your own.
    
    - Add `google-services.json` in **app** directory
 
@@ -68,5 +62,3 @@ Build and run the Sample App.
 
 ## Documentation
    [Token Based Push Notification](https://prodocs.cometchat.com/docs/android-extensions-enhanced-push-notification)
-   
-  
