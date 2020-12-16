@@ -1,10 +1,12 @@
 package com.cometchat.pro.android.pushnotification;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ProgressBar;
@@ -12,12 +14,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cometchat.pro.android.pushnotification.constants.AppConfig;
+import com.cometchat.pro.android.pushnotification.utils.MyFirebaseMessagingService;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.installations.FirebaseInstallations;
+import com.google.firebase.installations.InstallationTokenResult;
 
+import utils.PreferenceUtil;
 import utils.Utils;
 
 
@@ -28,6 +38,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText uid;
     private TextView title;
     private TextView des1,des2;
+    String token;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,9 +102,36 @@ public class LoginActivity extends AppCompatActivity {
     private void login(String uid) {
 
 
-        CometChat.login(uid, AppConfig.AppDetails.API_KEY, new CometChat.CallbackListener<User>() {
+        CometChat.login(uid,AppConfig.AppDetails.API_KEY, new CometChat.CallbackListener<User>() {
             @Override
             public void onSuccess(User user) {
+                token = MyFirebaseMessagingService.token;
+                if (MyFirebaseMessagingService.token==null) {
+                    FirebaseInstanceId.getInstance().getInstanceId()
+                            .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                            if (!task.isSuccessful()) {
+                                Toast.makeText(LoginActivity.this,task.getException().getLocalizedMessage(),Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            token = task.getResult().getToken();
+                            CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
+                                @Override
+                                public void onSuccess(String s) {
+                                    Toast.makeText(LoginActivity.this,s,Toast.LENGTH_LONG).show();
+                                    Log.e( "onSuccessPN: ",s );
+                                }
+
+                                @Override
+                                public void onError(CometChatException e) {
+                                    Log.e("onErrorPN: ",e.getMessage() );
+                                    Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    });
+                }
                 progressBar.setVisibility(View.GONE);
                 finish();
                 startActivity(new Intent(LoginActivity.this, PushNotificationActivity.class));

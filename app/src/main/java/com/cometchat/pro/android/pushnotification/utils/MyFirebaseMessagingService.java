@@ -15,8 +15,12 @@ import com.cometchat.pro.android.pushnotification.R;
 import com.cometchat.pro.android.pushnotification.constants.AppConfig;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
+import com.cometchat.pro.core.CometChat;
+import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.helpers.CometChatHelper;
 import com.cometchat.pro.models.BaseMessage;
+import com.cometchat.pro.models.Group;
+import com.cometchat.pro.models.MediaMessage;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -32,6 +36,8 @@ import java.net.URL;
 import java.util.Date;
 
 import constant.StringContract;
+import screen.messagelist.CometChatMessageListActivity;
+import utils.PreferenceUtil;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -128,7 +134,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         try {
             int m = (int) ((new Date().getTime()));
             String GROUP_ID = "group_id";
-
+            Intent messageIntent = new Intent(getApplicationContext(), CometChatMessageListActivity.class);
+            messageIntent.putExtra(StringContract.IntentStrings.TYPE,baseMessage.getReceiverType());
+            if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
+                messageIntent.putExtra(StringContract.IntentStrings.NAME,baseMessage.getSender().getName());
+                messageIntent.putExtra(StringContract.IntentStrings.UID,baseMessage.getSender().getUid());
+                messageIntent.putExtra(StringContract.IntentStrings.AVATAR,baseMessage.getSender().getAvatar());
+                messageIntent.putExtra(StringContract.IntentStrings.STATUS,baseMessage.getSender().getStatus());
+            } else if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
+                messageIntent.putExtra(StringContract.IntentStrings.GUID,((Group)baseMessage.getReceiver()).getGuid());
+                messageIntent.putExtra(StringContract.IntentStrings.NAME,((Group)baseMessage.getReceiver()).getName());
+                messageIntent.putExtra(StringContract.IntentStrings.GROUP_DESC,((Group) baseMessage.getReceiver()).getDescription());
+                messageIntent.putExtra(StringContract.IntentStrings.GROUP_TYPE,((Group) baseMessage.getReceiver()).getGroupType());
+                messageIntent.putExtra(StringContract.IntentStrings.GROUP_OWNER,((Group) baseMessage.getReceiver()).getOwner());
+                messageIntent.putExtra(StringContract.IntentStrings.MEMBER_COUNT,((Group) baseMessage.getReceiver()).getMembersCount());
+            }
+            PendingIntent messagePendingIntent = PendingIntent.getActivity(getApplicationContext(),
+                    0123,messageIntent,PendingIntent.FLAG_UPDATE_CURRENT);
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"2")
                     .setSmallIcon(R.drawable.cc)
                     .setContentTitle(json.getString("title"))
@@ -137,10 +159,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     .setColor(getResources().getColor(R.color.colorPrimary))
                     .setLargeIcon(getBitmapFromURL(baseMessage.getSender().getAvatar()))
                     .setGroup(GROUP_ID)
+                    .setContentIntent(messagePendingIntent)
                     .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-
+            if (baseMessage.getType().equals(CometChatConstants.MESSAGE_TYPE_IMAGE)) {
+                builder.setStyle(new NotificationCompat.BigPictureStyle()
+                        .bigPicture(getBitmapFromURL(((MediaMessage)baseMessage).getAttachment().getFileUrl())));
+            }
             NotificationCompat.Builder summaryBuilder = new NotificationCompat.Builder(this,"2")
                     .setContentTitle("CometChat")
                     .setContentText(count+" messages")
@@ -151,7 +177,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             if (isCall){
                 builder.setGroup(GROUP_ID+"Call");
-                if (json.getString("alert").equals("Incoming audio call") || json.getString("alert").equals("Incoming video call")) {
+                if (json.getString("alert").equals("Incoming audio call") || json.getString("body").equals("Incoming video call")) {
                     builder.setOngoing(true);
                     builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                     builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));

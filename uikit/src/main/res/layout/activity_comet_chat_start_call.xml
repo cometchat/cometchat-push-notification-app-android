@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:id="@+id/call_view"
-    android:background="@color/darkModeBackground"
     android:layout_height="match_parent"
+    android:background="@color/darkModeBackground"
     tools:context="screen.CometChatStartCallActivity">
     <LinearLayout
         android:layout_centerInParent="true"

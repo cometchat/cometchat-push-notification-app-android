@@ -2,6 +2,7 @@ package listeners;
 
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.cometchat.pro.constants.CometChatConstants;
@@ -15,6 +16,7 @@ import com.cometchat.pro.uikit.CometChatCallList;
 import helper.CometChatAudioHelper;
 import screen.CometChatCallActivity;
 import screen.CometChatStartCallActivity;
+import utils.CallUtils;
 import utils.Utils;
 
 /**
@@ -23,6 +25,7 @@ import utils.Utils;
  */
 public class CometChatCallListener {
 
+    public static boolean isInitialized;
 
     /**
      * This method is used to add CallListener in app
@@ -31,21 +34,24 @@ public class CometChatCallListener {
      */
     public static void addCallListener(String TAG,Context context)
     {
+        isInitialized = true;
         CometChat.addCallListener(TAG, new CometChat.CallListener() {
             @Override
             public void onIncomingCallReceived(Call call) {
                 if (CometChat.getActiveCall()==null) {
                     if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
-                        Utils.startCallIntent(context, (User) call.getCallInitiator(), call.getType(),
+                        CallUtils.startCallIntent(context, (User) call.getCallInitiator(), call.getType(),
                                 false, call.getSessionId());
                     } else {
-                        Utils.startGroupCallIntent(context, (Group) call.getReceiver(), call.getType(),
+                        CallUtils.startGroupCallIntent(context, (Group) call.getReceiver(), call.getType(),
                                 false, call.getSessionId());
                     }
                 } else {
                     CometChat.rejectCall(call.getSessionId(), CometChatConstants.CALL_STATUS_BUSY, new CometChat.CallbackListener<Call>() {
                         @Override
-                        public void onSuccess(Call call) {}
+                        public void onSuccess(Call call) {
+                            Toast.makeText(context,call.getSender().getName()+" tried to call you",Toast.LENGTH_LONG).show();
+                        }
 
                         @Override
                         public void onError(CometChatException e) {
@@ -57,19 +63,30 @@ public class CometChatCallListener {
 
             @Override
             public void onOutgoingCallAccepted(Call call) {
-                Utils.startCall(context, call);
+                if(CometChatStartCallActivity.activity==null) {
+                    if (CometChatCallActivity.callActivity != null) {
+                        CometChatCallActivity.cometChatAudioHelper.stop(false);
+                        CallUtils.startCall(CometChatCallActivity.callActivity, call);
+                    }
+                } else {
+                    CometChatStartCallActivity.activity.finish();
+                    if (CometChatCallActivity.callActivity != null) {
+                        CometChatCallActivity.cometChatAudioHelper.stop(false);
+                        CallUtils.startCall(CometChatCallActivity.callActivity, call);
+                    }
+                }
             }
 
             @Override
             public void onOutgoingCallRejected(Call call) {
-                if (CometChatStartCallActivity.activity!=null)
-                    CometChatStartCallActivity.activity.finish();
+                if (CometChatCallActivity.callActivity!=null)
+                    CometChatCallActivity.callActivity.finish();
             }
 
             @Override
             public void onIncomingCallCancelled(Call call){
-                if (CometChatStartCallActivity.activity!=null)
-                    CometChatStartCallActivity.activity.finish();
+                if (CometChatCallActivity.callActivity!=null)
+                    CometChatCallActivity.callActivity.finish();
             }
         });
     }
@@ -79,6 +96,8 @@ public class CometChatCallListener {
      * @param TAG is a unique Identifier
      */
     public static void removeCallListener(String TAG) {
+
+        isInitialized = false;
         CometChat.removeCallListener(TAG);
     }
 
@@ -96,6 +115,6 @@ public class CometChatCallListener {
      *
      */
     public static void makeCall(Context context, String receiverId, String receiverType, String callType) {
-        Utils.initiatecall(context,receiverId,receiverType,callType);
+        CallUtils.initiateCall(context,receiverId,receiverType,callType);
     }
 }

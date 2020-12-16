@@ -43,6 +43,7 @@ import java.util.List;
 import listeners.OnItemClickListener;
 import utils.FontUtils;
 import utils.Utils;
+import utils.firebaseUtils.MyFirebaseMessagingService;
 
 /*
 
@@ -343,7 +344,7 @@ public class CometChatConversationListScreen extends Fragment implements TextWat
         Log.d(TAG, "onResume: ");
         conversationsRequest = null;
         searchEdit.addTextChangedListener(this);
-//        rvConversationList.clearList();
+        rvConversationList.clearList();
         makeConversationList();
         addConversationListener();
     }

@@ -2,20 +2,25 @@ package listeners;
 
 import android.text.Editable;
 import android.view.View;
+import android.view.inputmethod.InputContentInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
+
+import androidx.core.view.inputmethod.InputContentInfoCompat;
 
 public abstract class ComposeActionListener {
 
     public void onMoreActionClicked(ImageView moreIcon) {}
 
-    public void onCameraActionClicked(ImageView cameraIcon) {}
+    public void onPollActionClicked() {}
 
-    public void onGalleryActionClicked(ImageView galleryIcon) {}
+    public void onCameraActionClicked() {}
 
-    public void onAudioActionClicked(ImageView audioIcon) {}
+    public void onGalleryActionClicked() {}
 
-    public void onFileActionClicked(ImageView fileIcon) {}
+    public void onAudioActionClicked() {}
+
+    public void onFileActionClicked() {}
 
     public void onEmojiActionClicked(ImageView emojiIcon) {}
 
@@ -28,6 +33,8 @@ public abstract class ComposeActionListener {
     public abstract void onTextChanged(CharSequence charSequence, int i, int i1, int i2);
 
     public abstract void afterTextChanged(Editable editable);
+
+    public void onEditTextMediaSelected(InputContentInfoCompat inputContentInfo) {};
 
 
     public void getCameraActionView(ImageView cameraIcon) {
@@ -42,4 +49,10 @@ public abstract class ComposeActionListener {
         fileIcon.setVisibility(View.VISIBLE);
     }
 
+    public void getLocationActionView(ImageView locationIcon) {
+        locationIcon.setVisibility(View.VISIBLE);
+    }
+
+    public void onLocationActionClicked() {
+    }
 }

@@ -1,11 +1,18 @@
 package constant;
 
-import android.graphics.Color;
+import com.cometchat.pro.constants.CometChatConstants;
+import com.cometchat.pro.uikit.R;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class StringContract {
 
     public static class AppInfo {
         public static String API_KEY = "";
+
+        public static String APP_ID = "";
     }
     public static class IntentStrings {
 
@@ -81,8 +88,35 @@ public class StringContract {
 
         public static final String CONVERSATION_NAME = "conversation_name";
 
-
         public static final String INTENT_MEDIA_MESSAGE = "intent_media_message" ;
+
+        public static final String IMAGE_MODERATION = "image_moderation" ;
+
+        public static final String CUSTOM_MESSAGE = "custom_message" ;
+
+        public static final String LOCATION = "LOCATION" ;
+
+        public static final String LOCATION_LATITUDE = "latitude";
+
+        public static final String LOCATION_LONGITUDE = "longitude" ;
+
+        public static final String MESSAGE_CATEGORY = "message_category";
+
+        public static final String PARENT_BASEMESSAGE = "parent_baseMessage";
+
+        public static final String POLL_VOTE_COUNT = "poll_vote_count";
+
+        public static final String POLLS = "extension_poll";
+
+        public static String POLL_QUESTION = "poll_question";
+
+        public static String POLL_OPTION = "poll_option";
+
+        public static String POLL_RESULT = "poll_result";
+
+        public static String POLL_ID = "poll_id";
+
+        public static final String MEDIA_SIZE = "media_size" ;
     }
 
     public static class Tab {
@@ -109,5 +143,54 @@ public class StringContract {
         public static final int READ_STORAGE = 001;
 
         public static final int RECORD = 003;
+
+        public static final int LOCATION = 14;
+    }
+    public static class MapUrl{
+
+        public static final String MAPS_URL = "https://maps.googleapis.com/maps/api/staticmap?zoom=16&size=380x220&markers=color:red|";
+
+        public static final String MAP_ACCESS_KEY = "AIzaSyAa8HeLH2lQMbPeOiMlM9D1VxZ7pbGQq8o";
+    }
+
+
+    public static class MessageRequest {
+
+        public static List<String> messageTypesForUser = new ArrayList<>(Arrays.asList(
+                CometChatConstants.MESSAGE_TYPE_CUSTOM,
+                CometChatConstants.MESSAGE_TYPE_AUDIO,
+                CometChatConstants.MESSAGE_TYPE_TEXT,
+                CometChatConstants.MESSAGE_TYPE_IMAGE,
+                CometChatConstants.MESSAGE_TYPE_VIDEO,
+                CometChatConstants.MESSAGE_TYPE_FILE,
+                //Custom Messages
+                StringContract.IntentStrings.LOCATION,
+                StringContract.IntentStrings.POLLS
+        )) ;
+        public static List<String> messageTypesForGroup = new ArrayList<>(Arrays.asList(
+                CometChatConstants.MESSAGE_TYPE_CUSTOM,
+                CometChatConstants.MESSAGE_TYPE_AUDIO,
+                CometChatConstants.MESSAGE_TYPE_TEXT,
+                CometChatConstants.MESSAGE_TYPE_IMAGE,
+                CometChatConstants.MESSAGE_TYPE_VIDEO,
+                CometChatConstants.MESSAGE_TYPE_FILE,
+                //For Group Actions
+                CometChatConstants.ActionKeys.ACTION_TYPE_GROUP_MEMBER,
+                //Custom Messages
+                StringContract.IntentStrings.LOCATION,
+                StringContract.IntentStrings.POLLS
+        ));
+
+        public static List<String> messageCategoriesForGroup = new ArrayList<>(Arrays.asList(
+                CometChatConstants.CATEGORY_MESSAGE,
+                CometChatConstants.CATEGORY_CUSTOM,
+                CometChatConstants.CATEGORY_CALL,
+                CometChatConstants.CATEGORY_ACTION));
+
+
+        public static List<String> messageCategoriesForUser = new ArrayList<>(Arrays.asList(
+                CometChatConstants.CATEGORY_MESSAGE,
+                CometChatConstants.CATEGORY_CUSTOM,
+                CometChatConstants.CATEGORY_CALL));
     }
 }

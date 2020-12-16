@@ -1,8 +1,5 @@
 package utils;
 
-import android.app.Activity;
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -12,8 +9,9 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.media.AudioManager;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -23,39 +21,31 @@ import android.provider.OpenableColumns;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.databinding.BindingAdapter;
 import androidx.renderscript.Allocation;
 import androidx.renderscript.Element;
 import androidx.renderscript.RenderScript;
 import androidx.renderscript.ScriptIntrinsicBlur;
 
 import com.cometchat.pro.constants.CometChatConstants;
-import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.helpers.Logger;
 import com.cometchat.pro.models.Action;
 import com.cometchat.pro.models.BaseMessage;
-import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.GroupMember;
 import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.models.TextMessage;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.snackbar.Snackbar;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -66,25 +56,67 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import constant.StringContract;
 import kotlin.ranges.RangesKt;
-import screen.CometChatCallActivity;
-import screen.CometChatStartCallActivity;
+import utils.firebaseUtils.MyFirebaseMessagingService;
 
 public class Utils {
 
     private static final String TAG = "Utils";
 
+    public static void setHyperLinkSupport(Context context,TextView txtMessage) {
+        new PatternBuilder().
+                addPattern(Pattern.compile("(^|[\\s.:;?\\-\\]<\\(])" +
+                                "((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
+                                "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])"),
+                        context.getResources().getColor(UISettings.getUrlColor()),
+                        new PatternBuilder.SpannableClickedListener() {
+                            @Override
+                            public void onSpanClicked(String text) {
+                                if (!text.trim().contains("http")) {
+                                    text = "http://"+text;
+                                }
+                                Intent intent = new Intent(Intent.ACTION_VIEW);
+                                intent.setData(Uri.parse(text.trim()));
+                                context.startActivity(Intent.createChooser(intent, "Url"));
+                            }
+                        }).into(txtMessage);
+        new PatternBuilder().
+                addPattern(Patterns.PHONE, context.getResources().getColor(UISettings.getPhoneColor()),
+                        new PatternBuilder.SpannableClickedListener() {
+                            @Override
+                            public void onSpanClicked(String text) {
+                                Intent intent = new Intent(Intent.ACTION_DIAL,Uri.parse(text));
+                                intent.setData(Uri.parse("tel:"+text));
+                                context.startActivity(Intent.createChooser(intent, "Dial"));
+                            }
+                        }).into(txtMessage);
+        new PatternBuilder().
+                addPattern(Pattern.compile("[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}"),
+                        context.getResources().getColor(UISettings.getEmailColor()),
+                        new PatternBuilder.SpannableClickedListener() {
+                            @Override
+                            public void onSpanClicked(String text) {
+                                Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" +text));
+                                intent.putExtra(Intent.EXTRA_EMAIL, text);
+                                context.startActivity(Intent.createChooser(intent, "Mail"));
+                            }
+                        }).into(txtMessage);
+    }
+
+
+    /**
+     * Below method is used to remove the emojis from string
+     * @param content is a String object
+     * @return a String value without emojis.
+     */
     public static String removeEmojiAndSymbol(String content) {
         String utf8tweet = "";
         try {
@@ -101,6 +133,8 @@ public class Utils {
         utf8tweet = unicodeOutlierMatcher.replaceAll(" ");
         return utf8tweet;
     }
+
+
     public static boolean isDarkMode(Context context)
     {
         int nightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -141,29 +175,6 @@ public class Utils {
     }
 
 
-    public static void initiatecall(Context context,String recieverID,String receiverType,String callType)
-    {
-        Call call = new Call(recieverID,receiverType,callType);
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("bookingId", 6);
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        call.setMetadata(jsonObject);
-        CometChat.initiateCall(call, new CometChat.CallbackListener<Call>() {
-            @Override
-            public void onSuccess(Call call) {
-                Utils.startCallIntent(context,((User)call.getCallReceiver()),call.getType(),true,call.getSessionId());
-            }
-
-            @Override
-            public void onError(CometChatException e) {
-                Log.e(TAG, "onError: "+e.getMessage());
-                Snackbar.make(((Activity)context).getWindow().getDecorView().getRootView(),context.getResources().getString(R.string.call_initiate_error)+":"+e.getMessage(),Snackbar.LENGTH_LONG).show();
-            }
-        });
-    }
     public static String convertTimeStampToDurationTime(long var0) {
         long var2 = var0 / 1000L;
         long var4 = var2 / 60L % 60L;
@@ -307,6 +318,29 @@ public class Utils {
         String lastMessageTime = new SimpleDateFormat("h:mm a").format(new java.util.Date(timestamp * 1000));
         String lastMessageDate = new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date(timestamp * 1000));
         String lastMessageWeek = new SimpleDateFormat("EEE").format(new java.util.Date(timestamp * 1000));
+        long currentTimeStamp = System.currentTimeMillis();
+
+        long diffTimeStamp = currentTimeStamp - timestamp * 1000;
+
+        Log.e(TAG, "getLastMessageDate: " + 24 * 60 * 60 * 1000);
+        if (diffTimeStamp < 24 * 60 * 60 * 1000) {
+            return lastMessageTime;
+
+        } else if (diffTimeStamp < 48 * 60 * 60 * 1000) {
+
+            return "Yesterday";
+        } else if (diffTimeStamp < 7 * 24 * 60 * 60 * 1000) {
+            return lastMessageWeek;
+        } else {
+            return lastMessageDate;
+        }
+
+    }
+
+    public static String getReceiptDate(long timestamp) {
+        String lastMessageTime = new SimpleDateFormat("h:mm a").format(new java.util.Date(timestamp * 1000));
+        String lastMessageDate = new SimpleDateFormat("dd/MM h:mm a").format(new java.util.Date(timestamp * 1000));
+        String lastMessageWeek = new SimpleDateFormat("EEE h:mm a").format(new java.util.Date(timestamp * 1000));
         long currentTimeStamp = System.currentTimeMillis();
 
         long diffTimeStamp = currentTimeStamp - timestamp * 1000;
@@ -633,41 +667,6 @@ public class Utils {
         tmpOut.copyTo(outputBitmap);
         return outputBitmap;
     }
-    public static void startCallIntent(Context context, User user, String type,
-                                       boolean isOutgoing, @NonNull String sessionId) {
-        Intent videoCallIntent = new Intent(context, CometChatCallActivity.class);
-        videoCallIntent.putExtra(StringContract.IntentStrings.NAME, user.getName());
-        videoCallIntent.putExtra(StringContract.IntentStrings.UID,user.getUid());
-        videoCallIntent.putExtra(StringContract.IntentStrings.SESSION_ID,sessionId);
-        videoCallIntent.putExtra(StringContract.IntentStrings.AVATAR, user.getAvatar());
-        videoCallIntent.setAction(type);
-        videoCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        if (isOutgoing) {
-            videoCallIntent.setType("outgoing");
-        }
-        else {
-            videoCallIntent.setType("incoming");
-        }
-        context.startActivity(videoCallIntent);
-    }
-    public static void startGroupCallIntent(Context context, Group group, String type,
-                                            boolean isOutgoing, @NonNull String sessionId) {
-        Intent videoCallIntent = new Intent(context, CometChatCallActivity.class);
-        videoCallIntent.putExtra(StringContract.IntentStrings.NAME, group.getName());
-        videoCallIntent.putExtra(StringContract.IntentStrings.UID,group.getGuid());
-        videoCallIntent.putExtra(StringContract.IntentStrings.SESSION_ID,sessionId);
-        videoCallIntent.putExtra(StringContract.IntentStrings.AVATAR, group.getIcon());
-        videoCallIntent.setAction(type);
-        videoCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        if (isOutgoing) {
-            videoCallIntent.setType("outgoing");
-        }
-        else {
-            videoCallIntent.setType("incoming");
-        }
-        context.startActivity(videoCallIntent);
-    }
 
     public static float dpToPx(Context context, float valueInDp) {
         Resources resources = context.getResources();
@@ -690,81 +689,18 @@ public class Utils {
             return null;
         }
     }
-    public static void showCallNotifcation(Context context, Call call) {
+
+    public static String getAddress(Context context, double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    int REQUEST_CODE = 12;
-                    int m = (int) ((new Date().getTime()));
-                    String GROUP_ID = "group_id";
-                    String receiverName="",callType,receiverAvatar="",receiverUid="";
-
-                    if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER) && call.getSender().getUid().equals(CometChat.getLoggedInUser().getUid()))
-                    {
-                        receiverUid = ((User)call.getCallReceiver()).getUid();
-                        receiverName = ((User)call.getCallReceiver()).getName();
-                        receiverAvatar = ((User)call.getCallReceiver()).getAvatar();
-                    } else if(call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
-                        receiverUid = call.getSender().getUid();
-                        receiverName = call.getSender().getName();
-                        receiverAvatar = call.getSender().getAvatar();
-                    } else {
-                        receiverUid = ((Group)call.getReceiver()).getGuid();
-                        receiverName = ((Group)call.getReceiver()).getName();
-                        receiverAvatar = ((Group)call.getReceiver()).getIcon();
-                    }
-                    if (call.getType().equals(CometChatConstants.CALL_TYPE_AUDIO)) {
-                        callType = context.getResources().getString(R.string.incoming_audio_call);
-                    } else {
-                        callType = context.getResources().getString(R.string.incoming_video_call);
-                    }
-
-                    Intent callIntent;
-                    callIntent = new Intent(context, CometChatCallActivity.class);
-                    callIntent.putExtra(StringContract.IntentStrings.NAME, receiverName);
-                    callIntent.putExtra(StringContract.IntentStrings.UID, receiverUid);
-                    callIntent.putExtra(StringContract.IntentStrings.SESSION_ID, call.getSessionId());
-                    callIntent.putExtra(StringContract.IntentStrings.AVATAR, receiverAvatar);
-                    callIntent.setAction(call.getType());
-                    callIntent.setType("incoming");
-
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(context,"2")
-                            .setSmallIcon(R.drawable.cc)
-                            .setContentTitle(receiverName)
-                            .setContentText(callType)
-                            .setPriority(Notification.PRIORITY_HIGH)
-                            .setChannelId("2")
-                            .setColor(context.getResources().getColor(R.color.colorPrimary))
-                            .setLargeIcon(getBitmapFromURL(receiverAvatar))
-                            .setGroup(GROUP_ID)
-                            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-
-                    builder.setGroup(GROUP_ID+"Call");
-                    builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
-                    builder.addAction(0, "Answers", PendingIntent.getBroadcast(context, REQUEST_CODE, callIntent, PendingIntent.FLAG_UPDATE_CURRENT));
-                    builder.addAction(0, "Decline", PendingIntent.getBroadcast(context, 1, callIntent, PendingIntent.FLAG_UPDATE_CURRENT));
-                    notificationManager.notify(05,builder.build());
-
-                }
-            }).start();
-        } catch (Exception e) {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && addresses.size() > 0){
+                String address = addresses.get(0).getAddressLine(0);
+                return address;
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void startCall(Context context, Call call) {
-        Intent intent = new Intent(context, CometChatStartCallActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(StringContract.IntentStrings.SESSION_ID,call.getSessionId());
-        context.startActivity(intent);
-    }
-
-    public static void joinOnGoingCall(Context context) {
-        Intent intent = new Intent(context,CometChatCallActivity.class);
-        intent.putExtra(StringContract.IntentStrings.JOIN_ONGOING,true);
-        context.startActivity(intent);
+        return null;
     }
 }

@@ -1,14 +1,16 @@
-package com.cometchat.pro.uikit;
+package com.cometchat.pro.uikit.ComposeBox;
 
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -18,14 +20,18 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Chronometer;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.inputmethod.InputContentInfoCompat;
+import androidx.fragment.app.FragmentManager;
+
+import com.cometchat.pro.core.CometChat;
+import com.cometchat.pro.uikit.R;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,10 +41,12 @@ import java.util.TimerTask;
 import constant.StringContract;
 import listeners.ComposeActionListener;
 import utils.AudioVisualizer.AudioRecordView;
-import utils.KeyBoardUtils;
+import com.cometchat.pro.uikit.Settings.UISettings;
 import utils.Utils;
 
 public class ComposeBox extends RelativeLayout implements View.OnClickListener {
+
+    private static final String TAG = ComposeBox.class.getName();
 
     private AudioRecordView audioRecordView;
 
@@ -52,6 +60,8 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
 
     private Timer timer = new Timer();
 
+    private  ComposeBoxActionFragment composeBoxActionFragment;
+
     private String audioFileNameWithPath;
 
     private boolean isOpen,isRecording,isPlaying,voiceMessage;
@@ -62,7 +72,7 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
 
     private Chronometer recordTime;
 
-    public EditText etComposeBox;
+    public CometChatEditText etComposeBox;
 
     private RelativeLayout composeBox;
 
@@ -80,6 +90,11 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
 
     private int color;
 
+    private Bundle bundle = new Bundle();
+
+    public boolean isGalleryVisible = true,isAudioVisible = true,isCameraVisible = true,
+            isFileVisible = true,isLocationVisible = true,isPollVisible = true;
+
     public ComposeBox(Context context) {
         super(context);
         initViewComponent(context,null,-1,-1);
@@ -94,6 +109,16 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
         super(context, attrs, defStyleAttr);
         initViewComponent(context,attrs,defStyleAttr,-1);
     }
+
+    public void setAudioButtonVisible(boolean result) { isAudioVisible = result; }
+
+    public void setGalleryButtonVisible(boolean result) { isGalleryVisible = result; }
+
+    public void setCameraButtonVisible(boolean result) { isCameraVisible = result; }
+
+    public void setFileButtonVisible(boolean result) { isFileVisible = result; }
+
+    public void setLocationButtonVisible(boolean result) { isLocationVisible = result; }
 
     private void initViewComponent(Context context,AttributeSet attributeSet,int defStyleAttr,int defStyleRes){
 
@@ -143,7 +168,6 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
         ivArrow.setImageTintList(ColorStateList.valueOf(color));
         ivCamera.setImageTintList(ColorStateList.valueOf(color));
         ivGallery.setImageTintList(ColorStateList.valueOf(color));
-
         ivFile.setImageTintList(ColorStateList.valueOf(color));
         ivSend.setImageTintList(ColorStateList.valueOf(color));
 
@@ -157,6 +181,36 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
         ivCamera.setOnClickListener(this);
 
 
+        composeBoxActionFragment = new ComposeBoxActionFragment();
+        composeBoxActionFragment.setComposeBoxActionListener(new ComposeBoxActionFragment.ComposeBoxActionListener() {
+            @Override
+            public void onGalleryClick() {
+                composeActionListener.onGalleryActionClicked();
+            }
+
+            @Override
+            public void onCameraClick() {
+                composeActionListener.onCameraActionClicked();
+            }
+
+            @Override
+            public void onFileClick() {
+                composeActionListener.onFileActionClicked();
+            }
+
+            @Override
+            public void onAudioClick() {
+                composeActionListener.onAudioActionClicked();
+            }
+
+            @Override
+            public void onLocationClick() {
+                composeActionListener.onLocationActionClicked();
+            }
+
+            @Override
+            public void onPollClick() { composeActionListener.onPollActionClicked(); }
+        });
         etComposeBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -181,6 +235,16 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
                 }
             }
         });
+        etComposeBox.setMediaSelected(new CometChatEditText.OnEditTextMediaListener() {
+            @Override
+            public void OnMediaSelected(InputContentInfoCompat i) {
+                composeActionListener.onEditTextMediaSelected(i);
+            }
+        });
+//        InputConnection ic = etComposeBox.onCreateInputConnection(new EditorInfo());
+//        EditorInfoCompat.setContentMimeTypes(new EditorInfo(),
+//                new String [] {"image/png","image/gif"});
+
 
         if (Utils.isDarkMode(context)) {
             composeBox.setBackgroundColor(getResources().getColor(R.color.darkModeBackground));
@@ -203,7 +267,29 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
             ivArrow.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.grey)));
             ivCamera.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
             ivFile.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-            ivFile.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        }
+        if (UISettings.getColor()!=null) {
+            int settingsColor = Color.parseColor(UISettings.getColor());
+            ivSend.setImageTintList(ColorStateList.valueOf(settingsColor));
+        }
+        isPollVisible = UISettings.isSendPolls();
+        isFileVisible = UISettings.isSendFiles();
+        isGalleryVisible = UISettings.isSendPhotosVideo();
+        isCameraVisible = UISettings.isSendPhotosVideo();
+        isAudioVisible = UISettings.isSendVoiceNotes();
+        isLocationVisible = UISettings.isShareLocation();
+        isPollVisible = UISettings.isSendPolls();
+        if (UISettings.isSendVoiceNotes()) {
+            ivMic.setVisibility(View.VISIBLE);
+        } else {
+            ivMic.setVisibility(GONE);
+        }
+        if (!UISettings.isSendPolls() &&
+                !UISettings.isSendFiles() &&
+                !UISettings.isSendPhotosVideo() &&
+                !UISettings.isSendVoiceNotes() &&
+                !UISettings.isShareLocation()) {
+            ivArrow.setVisibility(GONE);
         }
         a.recycle();
     }
@@ -227,7 +313,6 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
         this.composeActionListener.getCameraActionView(ivCamera);
         this.composeActionListener.getGalleryActionView(ivGallery);
         this.composeActionListener.getFileActionView(ivFile);
-
     }
 
     @Override
@@ -247,10 +332,10 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
             ivSend.setVisibility(View.GONE);
         }
         if (view.getId()==R.id.ivCamera){
-           composeActionListener.onCameraActionClicked(ivCamera);
+//           composeActionListener.onCameraActionClicked(ivCamera);
         }
         if (view.getId()==R.id.ivImage){
-           composeActionListener.onGalleryActionClicked(ivGallery);
+//           composeActionListener.onGalleryActionClicked(ivGallery);
         }
         if (view.getId()==R.id.ivSend){
             if (!voiceMessage) {
@@ -260,6 +345,7 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
                 audioFileNameWithPath = "";
                 voiceMessageLayout.setVisibility(GONE);
                 etComposeBox.setVisibility(View.VISIBLE);
+                ivDelete.setVisibility(GONE);
                 ivSend.setVisibility(GONE);
                 ivArrow.setVisibility(View.VISIBLE);
                 ivMic.setVisibility(View.VISIBLE);
@@ -271,23 +357,33 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
 
         }
         if(view.getId()==R.id.ivAudio) {
-            composeActionListener.onAudioActionClicked(ivAudio);
+//            composeActionListener.onAudioActionClicked(ivAudio);
         }
         if (view.getId()==R.id.ivFile){
-           composeActionListener.onFileActionClicked(ivFile);
+//           composeActionListener.onFileActionClicked(ivFile);
         }
         if(view.getId()==R.id.ivArrow) {
-            if (isOpen) {
-               closeActionContainer();
-            } else {
-                openActionContainer();
-            }
+//            if (isOpen) {
+//               closeActionContainer();
+//            } else {
+//                openActionContainer();
+//            }
+            FragmentManager fm = ((AppCompatActivity)getContext()).getSupportFragmentManager();
+            bundle.putBoolean("isGalleryVisible",isGalleryVisible);
+            bundle.putBoolean("isCameraVisible",isCameraVisible);
+            bundle.putBoolean("isFileVisible",isFileVisible);
+            bundle.putBoolean("isAudioVisible",isAudioVisible);
+            bundle.putBoolean("isLocationVisible",isLocationVisible);
+            if (CometChat.isExtensionEnabled("polls"))
+                bundle.putBoolean("isPollsVisible",isPollVisible);
+            composeBoxActionFragment.setArguments(bundle);
+            composeBoxActionFragment.show(fm,composeBoxActionFragment.getTag());
         }
         if (view.getId()==R.id.ivMic) {
             if (Utils.hasPermissions(context, new String[]{Manifest.permission.RECORD_AUDIO,Manifest.permission.WRITE_EXTERNAL_STORAGE})) {
 
                 if (isOpen) {
-                    closeActionContainer();
+//                    closeActionContainer();
                 }
                 if (!isRecording) {
                     startRecord();
@@ -320,21 +416,25 @@ public class ComposeBox extends RelativeLayout implements View.OnClickListener {
         }
     }
 
-    public void openActionContainer() {
-        ivArrow.setRotation(45f);
-        isOpen = true;
-        Animation rightAnimate = AnimationUtils.loadAnimation(getContext(), R.anim.animate_right_slide);
-        rlActionContainer.startAnimation(rightAnimate);
-        rlActionContainer.setVisibility(View.VISIBLE);
+    public void usedIn(String className) {
+        bundle.putString("type",className);
     }
 
-    public void closeActionContainer() {
-        ivArrow.setRotation(0);
-        isOpen = false;
-        Animation leftAnim = AnimationUtils.loadAnimation(getContext(), R.anim.animate_left_slide);
-        rlActionContainer.startAnimation(leftAnim);
-        rlActionContainer.setVisibility(GONE);
-    }
+//    public void openActionContainer() {
+//        ivArrow.setRotation(45f);
+//        isOpen = true;
+//        Animation rightAnimate = AnimationUtils.loadAnimation(getContext(), R.anim.animate_right_slide);
+//        rlActionContainer.startAnimation(rightAnimate);
+//        rlActionContainer.setVisibility(View.VISIBLE);
+//    }
+//
+//    public void closeActionContainer() {
+//        ivArrow.setRotation(0);
+//        isOpen = false;
+//        Animation leftAnim = AnimationUtils.loadAnimation(getContext(), R.anim.animate_left_slide);
+//        rlActionContainer.startAnimation(leftAnim);
+//        rlActionContainer.setVisibility(GONE);
+//    }
 
     public void startRecord() {
             etComposeBox.setVisibility(GONE);

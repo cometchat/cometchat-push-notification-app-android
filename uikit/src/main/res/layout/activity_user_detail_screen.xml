@@ -183,7 +183,7 @@
             <LinearLayout
                 android:layout_marginTop="10dp"
                 android:orientation="vertical"
-                android:id="@+id/other_layout"
+                android:id="@+id/block_user_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <TextView
@@ -207,7 +207,7 @@
                     android:layout_marginTop="8dp"
                     android:paddingBottom="16dp"
                     android:textSize="18sp"
-                    android:textColor="@color/catalyst_redbox_background"
+                    android:textColor="@color/red"
                     android:text="@string/block_user"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
@@ -215,6 +215,7 @@
             <!-- End of Privacy_Support_Layout-->
             <!--Shared Media - This layout provides media files sent to user-->
             <LinearLayout
+                android:id="@+id/shared_media_layout"
                 android:layout_marginTop="10dp"
                 android:orientation="vertical"
                 android:layout_width="match_parent"

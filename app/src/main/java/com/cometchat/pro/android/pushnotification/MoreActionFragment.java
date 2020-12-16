@@ -55,7 +55,7 @@ public class MoreActionFragment extends BottomSheetDialogFragment {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MyFirebaseMessagingService.unsubscribeUserNotification(CometChat.getLoggedInUser().getUid());
+//                MyFirebaseMessagingService.unsubscribeUserNotification(CometChat.getLoggedInUser().getUid());
                 CometChat.logout(new CometChat.CallbackListener<String>() {
                     @Override
                     public void onSuccess(String s) {

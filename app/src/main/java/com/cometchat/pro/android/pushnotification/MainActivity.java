@@ -3,18 +3,29 @@ package com.cometchat.pro.android.pushnotification;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
 
+import com.cometchat.pro.android.pushnotification.utils.MyFirebaseMessagingService;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.android.pushnotification.constants.AppConfig;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.installations.FirebaseInstallations;
+import com.google.firebase.installations.InstallationTokenResult;
 
+import utils.PreferenceUtil;
 import utils.Utils;
 
 
@@ -33,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     private MaterialCardView superhero4;
 
     private AppCompatImageView ivLogo;
+
+    private String token;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +95,32 @@ public class MainActivity extends AppCompatActivity {
         CometChat.login(uid, AppConfig.AppDetails.API_KEY, new CometChat.CallbackListener<User>() {
             @Override
             public void onSuccess(User user) {
+                token = MyFirebaseMessagingService.token;
+                if (token==null) {
+                    FirebaseInstanceId.getInstance().getInstanceId()
+                            .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                    if (!task.isSuccessful()) {
+                                        Toast.makeText(MainActivity.this,task.getException().getLocalizedMessage(),Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
+                                    token = task.getResult().getToken();
+                                    CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
+                                        @Override
+                                        public void onSuccess(String s) {
+                                            Log.e(TAG, "onSuccess: "+s);
+                                        }
+
+                                        @Override
+                                        public void onError(CometChatException e) {
+                                            Log.e(TAG, "onError: "+e.getMessage());
+                                        }
+                                    });
+                                    Log.e(TAG, "onComplete: "+token);
+                                }
+                            });
+                }
                 String str = uid+"_progressbar";
                 int id = getResources().getIdentifier(str,"id",getPackageName());
                 findViewById(id).setVisibility(View.GONE);

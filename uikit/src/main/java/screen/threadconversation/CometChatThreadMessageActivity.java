@@ -2,6 +2,7 @@ package screen.threadconversation;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -10,19 +11,22 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.emoji.bundled.BundledEmojiCompatConfig;
+import androidx.emoji.text.EmojiCompat;
 import androidx.fragment.app.Fragment;
 
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.uikit.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import adapter.MessageAdapter;
 import adapter.ThreadAdapter;
 import constant.StringContract;
 import listeners.MessageActionCloseListener;
 import listeners.OnMessageLongClick;
+import com.cometchat.pro.uikit.Settings.UISettings;
 
 /**
 
@@ -77,18 +81,47 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
 
     private long sentAt;
 
+    private String messageCategory;
+
+    private double latitude;
+
+    private double longitude;
+
     private int replyCount;
 
     private String conversationName;
+
+    private String baseMessage;
+
+    private String pollQuestion;
+
+    private String pollOptions;
+
+    private ArrayList<String> pollResult;
+
+    private int voteCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cometchat_message_list);
 
+        if (UISettings.getColor() !=null) {
+            getWindow().setStatusBarColor(Color.parseColor(UISettings.getColor()));
+        }
+        EmojiCompat.Config config = new BundledEmojiCompatConfig(this);
+        EmojiCompat.init(config);
+
          if (getIntent()!=null) {
              Bundle bundle = new Bundle();
-
+//             if (getIntent().hasExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE))
+//                 baseMessage = getIntent().getStringExtra(StringContract.IntentStrings.PARENT_BASEMESSAGE);
+             if (getIntent().hasExtra(StringContract.IntentStrings.MESSAGE_CATEGORY))
+                 messageCategory = getIntent().getStringExtra(StringContract.IntentStrings.MESSAGE_CATEGORY);
+             if (getIntent().hasExtra(StringContract.IntentStrings.LOCATION_LONGITUDE))
+                 longitude = getIntent().getDoubleExtra(StringContract.IntentStrings.LOCATION_LONGITUDE,0);
+             if (getIntent().hasExtra(StringContract.IntentStrings.LOCATION_LATITUDE))
+                 latitude = getIntent().getDoubleExtra(StringContract.IntentStrings.LOCATION_LATITUDE,0);
              if (getIntent().hasExtra(StringContract.IntentStrings.CONVERSATION_NAME))
                  conversationName = getIntent().getStringExtra(StringContract.IntentStrings.CONVERSATION_NAME);
              if (getIntent().hasExtra(StringContract.IntentStrings.PARENT_ID))
@@ -119,7 +152,14 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
                  type = getIntent().getStringExtra(StringContract.IntentStrings.TYPE);
              if (getIntent().hasExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_MIME_TYPE))
                  mediaMime = getIntent().getStringExtra(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_MIME_TYPE);
-
+             if (getIntent().hasExtra(StringContract.IntentStrings.POLL_QUESTION))
+                 pollQuestion = getIntent().getStringExtra(StringContract.IntentStrings.POLL_QUESTION);
+             if (getIntent().hasExtra(StringContract.IntentStrings.POLL_OPTION))
+                 pollOptions = getIntent().getStringExtra(StringContract.IntentStrings.POLL_OPTION);
+             if (getIntent().hasExtra(StringContract.IntentStrings.POLL_RESULT))
+                 pollResult = getIntent().getStringArrayListExtra(StringContract.IntentStrings.POLL_RESULT);
+             if (getIntent().hasExtra(StringContract.IntentStrings.POLL_VOTE_COUNT))
+                 voteCount = getIntent().getIntExtra(StringContract.IntentStrings.POLL_VOTE_COUNT,0);
              if (type.equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
                  if (getIntent().hasExtra(StringContract.IntentStrings.GUID))
                      Id = getIntent().getStringExtra(StringContract.IntentStrings.GUID);
@@ -127,6 +167,8 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
                  if (getIntent().hasExtra(StringContract.IntentStrings.UID))
                      Id = getIntent().getStringExtra(StringContract.IntentStrings.UID);
              }
+//             bundle.putString(StringContract.IntentStrings.PARENT_BASEMESSAGE,baseMessage);
+             bundle.putString(StringContract.IntentStrings.MESSAGE_CATEGORY,messageCategory);
              bundle.putString(StringContract.IntentStrings.ID,Id);
              bundle.putString(StringContract.IntentStrings.CONVERSATION_NAME,conversationName);
              bundle.putString(StringContract.IntentStrings.TYPE,type);
@@ -140,6 +182,15 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
 
               if (messageType.equals(CometChatConstants.MESSAGE_TYPE_TEXT))
                   bundle.putString(StringContract.IntentStrings.TEXTMESSAGE,message);
+              else if (messageType.equals(StringContract.IntentStrings.LOCATION)) {
+                  bundle.putDouble(StringContract.IntentStrings.LOCATION_LATITUDE,latitude);
+                  bundle.putDouble(StringContract.IntentStrings.LOCATION_LONGITUDE,longitude);
+              } else if (messageType.equals(StringContract.IntentStrings.POLLS)) {
+                  bundle.putStringArrayList(StringContract.IntentStrings.POLL_RESULT,pollResult);
+                  bundle.putString(StringContract.IntentStrings.POLL_QUESTION,pollQuestion);
+                  bundle.putString(StringContract.IntentStrings.POLL_OPTION,pollOptions);
+                  bundle.putInt(StringContract.IntentStrings.POLL_VOTE_COUNT,voteCount);
+              }
               else {
                   bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_URL,mediaUrl);
                   bundle.putString(StringContract.IntentStrings.MESSAGE_TYPE_IMAGE_NAME,messagefileName);
@@ -200,5 +251,6 @@ public class CometChatThreadMessageActivity extends AppCompatActivity implements
 
     public void handleDialogClose(DialogInterface dialog) {
         ((MessageActionCloseListener)fragment).handleDialogClose(dialog);
+        dialog.dismiss();
     }
 }

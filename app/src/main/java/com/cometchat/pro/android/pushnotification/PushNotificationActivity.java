@@ -25,8 +25,10 @@ import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.CustomMessage;
+import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.models.TextMessage;
+import com.cometchat.pro.models.User;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -36,6 +38,7 @@ import org.json.JSONObject;
 import java.io.File;
 
 import constant.StringContract;
+import screen.CometChatGroupDetailScreenActivity;
 import utils.MediaUtils;
 import utils.Utils;
 
@@ -61,7 +64,6 @@ public class PushNotificationActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(getResources().getString(R.string.please_wait));
         progressDialog.setMessage(getResources().getString(R.string.media_uploading));
-        MyFirebaseMessagingService.subscribeUserNotification(CometChat.getLoggedInUser().getUid());
         progressDialog.setCancelable(false);
         moreBtn = findViewById(R.id.more_btn);
         titleTv = findViewById(R.id.title_tv);
@@ -105,7 +107,7 @@ public class PushNotificationActivity extends AppCompatActivity {
                 } else if (message.getText().toString().isEmpty()) {
                     message.setError(getResources().getString(R.string.fill_this_field));
                 } else {
-                    subscribePushNotification();
+//                    subscribePushNotification();
                     TextMessage textMessage = new TextMessage(uid.getText().toString(), message.getText().toString(), receiver);
                     sendMessage(textMessage);
                     message.setText("");
@@ -134,7 +136,7 @@ public class PushNotificationActivity extends AppCompatActivity {
                     uid.setError(getResources().getString(R.string.fill_this_field));
                 else {
                     try {
-                        subscribePushNotification();
+//                        subscribePushNotification();
                         JSONObject customData = new JSONObject();
                         customData.put("latitude","19.0760");
                         customData.put("longitude","72.8777");
@@ -185,6 +187,14 @@ public class PushNotificationActivity extends AppCompatActivity {
         CometChat.initiateCall(call, new CometChat.CallbackListener<Call>() {
             @Override
             public void onSuccess(Call call) {
+                if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_GROUP))
+                    Utils.startGroupCallIntent(PushNotificationActivity.this,
+                            ((Group)call.getCallReceiver()),call.getType(),true,
+                            call.getSessionId());
+                else if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER))
+                    Utils.startCallIntent(PushNotificationActivity.this,
+                            ((User)call.getCallReceiver()),call.getType(),true,
+                            call.getSessionId());
                 Toast.makeText(PushNotificationActivity.this,getResources().getString(R.string.call_initated_success),Toast.LENGTH_LONG).show();
             }
 
@@ -196,10 +206,10 @@ public class PushNotificationActivity extends AppCompatActivity {
         });
     }
 
-    private void subscribePushNotification() {
-        if (receiver.equals(CometChatConstants.RECEIVER_TYPE_GROUP))
-            MyFirebaseMessagingService.subscribeGroupNotification(uid.getText().toString());
-    }
+//    private void subscribePushNotification() {
+//        if (receiver.equals(CometChatConstants.RECEIVER_TYPE_GROUP))
+//            MyFirebaseMessagingService.subscribeGroupNotification(uid.getText().toString());
+//    }
 
     private void sendMessage(BaseMessage baseMessage) {
         if (baseMessage instanceof TextMessage) {
@@ -279,7 +289,7 @@ public class PushNotificationActivity extends AppCompatActivity {
     }
 
     private void sendMediaMessage(File file, String messageType) {
-        subscribePushNotification();
+//        subscribePushNotification();
         progressDialog.show();
         MediaMessage mediaMessage = new MediaMessage(uid.getText().toString(),file,messageType,receiver);
         sendMessage(mediaMessage);

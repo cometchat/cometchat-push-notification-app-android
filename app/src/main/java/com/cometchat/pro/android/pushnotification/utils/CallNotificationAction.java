@@ -17,6 +17,7 @@ import com.cometchat.pro.models.User;
 
 import constant.StringContract;
 import screen.CallActivity;
+import screen.CometChatStartCallActivity;
 
 public class CallNotificationAction extends BroadcastReceiver {
 
@@ -29,7 +30,7 @@ public class CallNotificationAction extends BroadcastReceiver {
             CometChat.acceptCall(sessionID, new CometChat.CallbackListener<Call>() {
                 @Override
                 public void onSuccess(Call call) {
-                    Intent acceptIntent = new Intent(context, CallActivity.class);
+                    Intent acceptIntent = new Intent(context, CometChatStartCallActivity.class);
                     acceptIntent.putExtra(StringContract.IntentStrings.SESSION_ID,call.getSessionId());
                     acceptIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(acceptIntent);
