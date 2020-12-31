@@ -114,25 +114,12 @@ public class LoginActivity extends AppCompatActivity {
                                         return;
                                     }
                                     token = task.getResult().getToken();
+                                    registerPushNotification(token);
                                 }
                             });
+                } else {
+                    registerPushNotification(token);
                 }
-                CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
-                    @Override
-                    public void onSuccess(String s) {
-                        Toast.makeText(LoginActivity.this,s,Toast.LENGTH_LONG).show();
-                        Log.e( "onSuccessPN: ",s );
-                    }
-
-                    @Override
-                    public void onError(CometChatException e) {
-                        Log.e("onErrorPN: ",e.getMessage() );
-                        Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-                progressBar.setVisibility(View.GONE);
-                finish();
-                startActivity(new Intent(LoginActivity.this, PushNotificationActivity.class));
             }
 
             @Override
@@ -142,6 +129,25 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void registerPushNotification(String token) {
+        CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                Toast.makeText(LoginActivity.this,s,Toast.LENGTH_LONG).show();
+                Log.e( "onSuccessPN: ",s );
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                Log.e("onErrorPN: ",e.getMessage() );
+                Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        progressBar.setVisibility(View.GONE);
+        finish();
+        startActivity(new Intent(LoginActivity.this, PushNotificationActivity.class));
     }
 
     public void createUser(View view) {

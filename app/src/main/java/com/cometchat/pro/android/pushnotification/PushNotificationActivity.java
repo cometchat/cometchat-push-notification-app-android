@@ -39,6 +39,7 @@ import java.io.File;
 
 import constant.StringContract;
 import screen.CometChatGroupDetailScreenActivity;
+import utils.CallUtils;
 import utils.MediaUtils;
 import utils.Utils;
 
@@ -188,11 +189,11 @@ public class PushNotificationActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Call call) {
                 if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_GROUP))
-                    Utils.startGroupCallIntent(PushNotificationActivity.this,
+                    CallUtils.startGroupCallIntent(PushNotificationActivity.this,
                             ((Group)call.getCallReceiver()),call.getType(),true,
                             call.getSessionId());
                 else if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER))
-                    Utils.startCallIntent(PushNotificationActivity.this,
+                    CallUtils.startCallIntent(PushNotificationActivity.this,
                             ((User)call.getCallReceiver()),call.getType(),true,
                             call.getSessionId());
                 Toast.makeText(PushNotificationActivity.this,getResources().getString(R.string.call_initated_success),Toast.LENGTH_LONG).show();

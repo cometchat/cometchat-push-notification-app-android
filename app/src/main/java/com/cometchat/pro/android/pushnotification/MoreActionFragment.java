@@ -36,7 +36,7 @@ public class MoreActionFragment extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(com.cometchat.pro.uikit.R.layout.fragment_more_actions, container, false);
+        View view = inflater.inflate(R.layout.fragment_more_actions, container, false);
         view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {

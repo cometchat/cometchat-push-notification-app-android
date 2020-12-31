@@ -16,7 +16,7 @@ import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.User;
 
 import constant.StringContract;
-import screen.CallActivity;
+import screen.CometChatCallActivity;
 import screen.CometChatStartCallActivity;
 
 public class CallNotificationAction extends BroadcastReceiver {
@@ -50,11 +50,13 @@ public class CallNotificationAction extends BroadcastReceiver {
                 public void onSuccess(Call call) {
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
                     notificationManager.cancel(05);
+                    if (CometChatCallActivity.callActivity!=null)
+                        CometChatCallActivity.callActivity.finish();
                 }
 
                 @Override
                 public void onError(CometChatException e) {
-
+                    Toast.makeText(context,"Error: "+e.getMessage(),Toast.LENGTH_LONG).show();
                 }
             });
         }

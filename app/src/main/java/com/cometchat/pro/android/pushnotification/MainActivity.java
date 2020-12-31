@@ -103,25 +103,13 @@ public class MainActivity extends AppCompatActivity {
                                         return;
                                     }
                                     token = task.getResult().getToken();
+                                    registerPushNotification(uid,token);
                                 }
                             });
+                } else {
+                    registerPushNotification(uid,token);
                 }
-                CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
-                    @Override
-                    public void onSuccess(String s) {
-                        Log.e(TAG, "onSuccess: "+s);
-                    }
-                    @Override
-                    public void onError(CometChatException e) {
-                        Log.e(TAG, "onError: "+e.getMessage());
-                    }
-                });
-                Log.e(TAG, "onComplete: "+token);
 
-                String str = uid+"_progressbar";
-                int id = getResources().getIdentifier(str,"id",getPackageName());
-                findViewById(id).setVisibility(View.GONE);
-                startActivity(new Intent(MainActivity.this, PushNotificationActivity.class));
             }
 
             @Override
@@ -133,6 +121,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void registerPushNotification(String uid,String token) {
+        Log.e(TAG, "onComplete: "+token);
+        CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                Toast.makeText(MainActivity.this,s,Toast.LENGTH_LONG).show();
+                Log.e( "onSuccessPN: ",s );
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                Log.e("onErrorPN: ",e.getMessage() );
+                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        String str = uid+"_progressbar";
+        int id = getResources().getIdentifier(str,"id",getPackageName());
+        findViewById(id).setVisibility(View.GONE);
+        startActivity(new Intent(MainActivity.this, PushNotificationActivity.class));
+    }
+
 
     @Override
     public void onBackPressed() {
