@@ -14,24 +14,23 @@ import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.User;
-
-import constant.StringContract;
-import screen.CometChatCallActivity;
-import screen.CometChatStartCallActivity;
+import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatCallActivity;
+import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatStartCallActivity;
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 
 public class CallNotificationAction extends BroadcastReceiver {
 
     String TAG = "CallNotificationAction";
     @Override
     public void onReceive(Context context, Intent intent) {
-        String sessionID = intent.getStringExtra(StringContract.IntentStrings.SESSION_ID);
-        Log.e(TAG, "onReceive: " + intent.getStringExtra(StringContract.IntentStrings.SESSION_ID));
+        String sessionID = intent.getStringExtra(UIKitConstants.IntentStrings.SESSION_ID);
+        Log.e(TAG, "onReceive: " + intent.getStringExtra(UIKitConstants.IntentStrings.SESSION_ID));
         if (intent.getAction().equals("Answers")) {
             CometChat.acceptCall(sessionID, new CometChat.CallbackListener<Call>() {
                 @Override
                 public void onSuccess(Call call) {
                     Intent acceptIntent = new Intent(context, CometChatStartCallActivity.class);
-                    acceptIntent.putExtra(StringContract.IntentStrings.SESSION_ID,call.getSessionId());
+                    acceptIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID,call.getSessionId());
                     acceptIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(acceptIntent);
                 }

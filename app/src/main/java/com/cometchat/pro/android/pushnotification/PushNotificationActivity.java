@@ -29,6 +29,10 @@ import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.models.TextMessage;
 import com.cometchat.pro.models.User;
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
+import com.cometchat.pro.uikit.ui_resources.utils.CallUtils;
+import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils;
+import com.cometchat.pro.uikit.ui_resources.utils.Utils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -36,12 +40,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.json.JSONObject;
 
 import java.io.File;
-
-import constant.StringContract;
-import screen.CometChatGroupDetailScreenActivity;
-import utils.CallUtils;
-import utils.MediaUtils;
-import utils.Utils;
 
 
 public class PushNotificationActivity extends AppCompatActivity {
@@ -122,9 +120,9 @@ public class PushNotificationActivity extends AppCompatActivity {
                     uid.setError(getResources().getString(R.string.fill_this_field));
                 else {
                     if (Utils.hasPermissions(PushNotificationActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE})) {
-                        startActivityForResult(MediaUtils.openGallery(PushNotificationActivity.this), StringContract.RequestCode.GALLERY);
+                        startActivityForResult(MediaUtils.openGallery(PushNotificationActivity.this), UIKitConstants.RequestCode.GALLERY);
                     } else {
-                        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, StringContract.RequestCode.GALLERY);
+                        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, UIKitConstants.RequestCode.GALLERY);
                     }
                 }
             }
@@ -266,7 +264,7 @@ public class PushNotificationActivity extends AppCompatActivity {
         Log.d(TAG, "onActivityResult: ");
 
         switch (requestCode) {
-            case StringContract.RequestCode.GALLERY:
+            case UIKitConstants.RequestCode.GALLERY:
                 if (data != null) {
 
                     File file = MediaUtils.getRealPath(PushNotificationActivity.this, data.getData());

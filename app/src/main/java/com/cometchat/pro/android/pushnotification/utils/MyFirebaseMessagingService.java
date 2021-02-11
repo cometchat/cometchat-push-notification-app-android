@@ -21,6 +21,8 @@ import com.cometchat.pro.helpers.CometChatHelper;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MediaMessage;
+import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity;
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -34,10 +36,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
-
-import constant.StringContract;
-import screen.messagelist.CometChatMessageListActivity;
-import utils.PreferenceUtil;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -135,19 +133,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             int m = (int) ((new Date().getTime()));
             String GROUP_ID = "group_id";
             Intent messageIntent = new Intent(getApplicationContext(), CometChatMessageListActivity.class);
-            messageIntent.putExtra(StringContract.IntentStrings.TYPE,baseMessage.getReceiverType());
+            messageIntent.putExtra(UIKitConstants.IntentStrings.TYPE,baseMessage.getReceiverType());
             if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
-                messageIntent.putExtra(StringContract.IntentStrings.NAME,baseMessage.getSender().getName());
-                messageIntent.putExtra(StringContract.IntentStrings.UID,baseMessage.getSender().getUid());
-                messageIntent.putExtra(StringContract.IntentStrings.AVATAR,baseMessage.getSender().getAvatar());
-                messageIntent.putExtra(StringContract.IntentStrings.STATUS,baseMessage.getSender().getStatus());
+                messageIntent.putExtra(UIKitConstants.IntentStrings.NAME,baseMessage.getSender().getName());
+                messageIntent.putExtra(UIKitConstants.IntentStrings.UID,baseMessage.getSender().getUid());
+                messageIntent.putExtra(UIKitConstants.IntentStrings.AVATAR,baseMessage.getSender().getAvatar());
+                messageIntent.putExtra(UIKitConstants.IntentStrings.STATUS,baseMessage.getSender().getStatus());
             } else if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
-                messageIntent.putExtra(StringContract.IntentStrings.GUID,((Group)baseMessage.getReceiver()).getGuid());
-                messageIntent.putExtra(StringContract.IntentStrings.NAME,((Group)baseMessage.getReceiver()).getName());
-                messageIntent.putExtra(StringContract.IntentStrings.GROUP_DESC,((Group) baseMessage.getReceiver()).getDescription());
-                messageIntent.putExtra(StringContract.IntentStrings.GROUP_TYPE,((Group) baseMessage.getReceiver()).getGroupType());
-                messageIntent.putExtra(StringContract.IntentStrings.GROUP_OWNER,((Group) baseMessage.getReceiver()).getOwner());
-                messageIntent.putExtra(StringContract.IntentStrings.MEMBER_COUNT,((Group) baseMessage.getReceiver()).getMembersCount());
+                messageIntent.putExtra(UIKitConstants.IntentStrings.GUID,((Group)baseMessage.getReceiver()).getGuid());
+                messageIntent.putExtra(UIKitConstants.IntentStrings.NAME,((Group)baseMessage.getReceiver()).getName());
+                messageIntent.putExtra(UIKitConstants.IntentStrings.GROUP_DESC,((Group) baseMessage.getReceiver()).getDescription());
+                messageIntent.putExtra(UIKitConstants.IntentStrings.GROUP_TYPE,((Group) baseMessage.getReceiver()).getGroupType());
+                messageIntent.putExtra(UIKitConstants.IntentStrings.GROUP_OWNER,((Group) baseMessage.getReceiver()).getOwner());
+                messageIntent.putExtra(UIKitConstants.IntentStrings.MEMBER_COUNT,((Group) baseMessage.getReceiver()).getMembersCount());
             }
             PendingIntent messagePendingIntent = PendingIntent.getActivity(getApplicationContext(),
                     0123,messageIntent,PendingIntent.FLAG_UPDATE_CURRENT);
@@ -177,7 +175,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             if (isCall){
                 builder.setGroup(GROUP_ID+"Call");
-                if (json.getString("alert").equals("Incoming audio call") || json.getString("body").equals("Incoming video call")) {
+                if (json.getString("alert").equals("Incoming audio call") || json.getString("alert").equals("Incoming video call")) {
                     builder.setOngoing(true);
                     builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                     builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
@@ -199,7 +197,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private Intent getCallIntent(String title){
         Intent callIntent = new Intent(getApplicationContext(), CallNotificationAction.class);
-        callIntent.putExtra(StringContract.IntentStrings.SESSION_ID,call.getSessionId());
+        callIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID,call.getSessionId());
         callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         callIntent.setAction(title);
         return callIntent;

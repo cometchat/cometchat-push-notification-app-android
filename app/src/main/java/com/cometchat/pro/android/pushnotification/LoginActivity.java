@@ -18,15 +18,13 @@ import com.cometchat.pro.android.pushnotification.utils.MyFirebaseMessagingServi
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.User;
+import com.cometchat.pro.uikit.ui_resources.utils.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-
-import utils.PreferenceUtil;
-import utils.Utils;
 
 
 public class LoginActivity extends AppCompatActivity {
