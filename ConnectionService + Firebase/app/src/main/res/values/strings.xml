@@ -1,0 +1,42 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Push Notification Sample App</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="avatar_description">This component will be the class of AppCompatImageView which is customizable to display Avatar</string>
+    <string name="statusIndicator_description">This component will be the class of View which is customizable to display status of the user</string>
+    <string name="badgeCount_description">This component will be the class of LinearLayout which is customizable to display the unread count of the messages in conversations.</string>
+    <string name="settings_bg_color_confirm">Background Confirm</string>
+    <string name="settings_default_color_confirm">Default Confirm</string>
+    <string name="settings_bg_color_dialog">Background Color</string>
+    <string name="userlist_description">This component will be the class of RecyclerView which is customizable to display list of users</string>
+    <string name="grouplist_description">This component will be the class of RecyclerView which is customizable to display list of groups</string>
+    <string name="conversationlist_description">This component will be the class of RecyclerView which is customizable to display list of recent conversation</string>
+    <string name="copyright">\u00A9 2020 CometChat Inc.</string>
+    <string name="channel_description">channel_description</string>
+    <string name="cometchat_unified_description" tools:ignore="ExtraTranslation">UI Unified directly launches a fully function chat experience within your app. It contains all the features a standard chat application has and reduces the development time and effort considerably.</string>
+    <string name="cometchat_screen_description" tools:ignore="ExtraTranslation">UI Screens are individual screens that can be used independently within your app to suit your requirements. These screens are fully function stand-alone screens which can be used to achieve specific use cases and reduce the development efforts considerably.</string>
+    <string name="circle" tools:ignore="ExtraTranslation">circle</string>
+    <string name="uicomponent_description" tools:ignore="ExtraTranslation">It show\'s list of component which users can use at their end to create thier own chat app within minutes.</string>
+    <string name="callList_description">This component will be the class of RecyclerView which is customizable to display list of calls.</string>
+    <string name="sharedMediaVw_description"><![CDATA[This component is a custom component it includes three tabs which show images,videos & files.]]></string>
+    <string name="push_notification">Push Notification</string>
+    <string name="enter_uid">Enter UID here</string>
+    <string name="to_user">To user</string>
+    <string name="to_group">To Group</string>
+    <string name="enter_text_message">Enter Text Message</string>
+    <string name="message">message</string>
+    <string name="logout_success">Logout Successfully</string>
+    <string name="text_message_sent">Text Message Sent Successfully</string>
+    <string name="text_message_failed">Failed to sent Text Message</string>
+    <string name="media_message_sent">Media Message sent successfully</string>
+    <string name="media_message_failed">Failed to send media message</string>
+    <string name="custom_message_sent">Custom Message sent successfully</string>
+    <string name="custom_message_failed">Failed to send custom message</string>
+    <string name="fill_this_field">Fill this field</string>
+    <string name="enter_guid">Enter GUID here</string>
+    <string name="call_initated_success">Call Initiated Successfully</string>
+    <string name="call_initated_error">Failed to initiate the Call</string>
+    <string name="please_wait">Please Wait</string>
+    <string name="media_uploading">Media is getting Uploaded</string>
+
+</resources>

@@ -89,8 +89,14 @@ Build and run the Sample App.
 
 
 ## 📝 Documentation
-   [Token Based Push Notification](https://prodocs.cometchat.com/docs/android-extensions-enhanced-push-notification)
-   
+
+We are providing two ways to implement push notification for your app.
+
+ 1. [Firebase](https://prodocs.cometchat.com/docs/android-extensions-enhanced-push-notification)
+
+ 2. [ConnectionService + Firebase](https://prodocs.cometchat.com/docs/android-push-notification-with-connectionservice) 
+
+Please refer our documentation to intergrate push notification inside your app.   
 
 ## Contributors
 
