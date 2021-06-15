@@ -1,12 +1,18 @@
 package com.cometchat.pro.uikit.ui_components.chats;
 
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -18,8 +24,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.core.ConversationsRequest;
 import com.cometchat.pro.exceptions.CometChatException;
@@ -28,6 +34,7 @@ import com.cometchat.pro.models.Action;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MessageReceipt;
 import com.cometchat.pro.models.User;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
 import com.cometchat.pro.uikit.ui_components.shared.cometchatConversations.CometChatConversations;
 import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.models.BaseMessage;
@@ -35,6 +42,11 @@ import com.cometchat.pro.models.Conversation;
 import com.cometchat.pro.models.CustomMessage;
 import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.models.TextMessage;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
+import com.cometchat.pro.uikit.ui_resources.utils.custom_alertDialog.CustomAlertDialogHelper;
+import com.cometchat.pro.uikit.ui_resources.utils.custom_alertDialog.OnAlertDialogButtonClickListener;
+import com.cometchat.pro.uikit.ui_resources.utils.recycler_touch.RecyclerViewSwipeListener;
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings;
 import com.facebook.shimmer.ShimmerFrameLayout;
 
 import java.util.ArrayList;
@@ -55,11 +67,13 @@ import com.cometchat.pro.uikit.ui_resources.utils.Utils;
 
 */
 
-public class CometChatConversationList extends Fragment implements TextWatcher {
+public class CometChatConversationList extends Fragment implements TextWatcher, OnAlertDialogButtonClickListener {
 
     private CometChatConversations rvConversationList;    //Uses to display list of conversations.
 
     private ConversationsRequest conversationsRequest;    //Uses to fetch Conversations.
+
+    private String conversationListType = UIKitSettings.getConversationsMode().toString();
 
     private static OnItemClickListener events;
 
@@ -83,6 +97,7 @@ public class CometChatConversationList extends Fragment implements TextWatcher {
         // Required empty public constructor
     }
 
+    private ProgressDialog progressDialog;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -105,14 +120,45 @@ public class CometChatConversationList extends Fragment implements TextWatcher {
 
         checkDarkMode();
 
+        CometChatError.init(getContext());
+
         searchEdit.setOnEditorActionListener((textView, i, keyEvent) -> {
             if (i == EditorInfo.IME_ACTION_SEARCH) {
-                rvConversationList.searchConversation(textView.getText().toString());
+                if (!textView.getText().toString().isEmpty()) {
+                    progressDialog = ProgressDialog.show(getContext(),"",getString(R.string.search));
+                    refreshConversation(new CometChat.CallbackListener<List<Conversation>>() {
+                        @Override
+                        public void onSuccess(List<Conversation> conversationList) {
+                            if (progressDialog!=null)
+                                progressDialog.dismiss();
+                            rvConversationList.searchConversation(textView.getText().toString());
+                        }
+
+                        @Override
+                        public void onError(CometChatException e) {
+                            if (progressDialog!=null)
+                                progressDialog.dismiss();
+                            CometChatSnackBar.show(getContext(),rvConversationList,
+                                    CometChatError.localized(e),CometChatSnackBar.ERROR);
+                        }
+                    });
+                }
                 return true;
             }
             return false;
         });
-
+//        clearSearch.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                searchEdit.setText("");
+//                clearSearch.setVisibility(View.GONE);
+//                refreshConversation();
+//                InputMethodManager inputMethodManager = (InputMethodManager)
+//                        getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+//                // Hide the soft keyboard
+//                inputMethodManager.hideSoftInputFromWindow(searchEdit.getWindowToken(),0);
+//            }
+//        });
 
         // Uses to fetch next list of conversations if rvConversationList (RecyclerView) is scrolled in upward direction.
         rvConversationList.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -135,9 +181,113 @@ public class CometChatConversationList extends Fragment implements TextWatcher {
             }
         });
 
+        RecyclerViewSwipeListener swipeHelper = new RecyclerViewSwipeListener(getContext()) {
+            @Override
+            public void instantiateUnderlayButton(RecyclerView.ViewHolder viewHolder, List<UnderlayButton> underlayButtons) {
+                Bitmap deleteBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.ic_delete);
+                underlayButtons.add(new RecyclerViewSwipeListener.UnderlayButton(
+                        "Delete",
+                        deleteBitmap,
+                        getResources().getColor(R.color.red),
+                        new RecyclerViewSwipeListener.UnderlayButtonClickListener() {
+                            @Override
+                            public void onClick(final int pos) {
+                                Conversation conversation = rvConversationList.getConversation(pos);
+                                if (conversation!=null) {
+                                    String conversationUid = "";
+                                    String type = "";
+                                    if (conversation.getConversationType()
+                                            .equalsIgnoreCase(CometChatConstants.CONVERSATION_TYPE_GROUP)) {
+                                        conversationUid = ((Group)conversation.getConversationWith()).getGuid();
+                                        type = CometChatConstants.CONVERSATION_TYPE_GROUP;
+                                    } else {
+                                        conversationUid = ((User)conversation.getConversationWith()).getUid();
+                                        type = CometChatConstants.CONVERSATION_TYPE_USER;
+                                    }
+                                    String finalConversationUid = conversationUid;
+                                    String finalType = type;
+                                    new CustomAlertDialogHelper(getContext(),
+                                            getString(R.string.delete_conversation_message),
+                                            null,
+                                            getString(R.string.yes),
+                                            "", getString(R.string.no), new OnAlertDialogButtonClickListener() {
+                                        @Override
+                                        public void onButtonClick(AlertDialog alertDialog, View v, int which, int popupId) {
+                                            if (which==DialogInterface.BUTTON_POSITIVE) {
+                                                ProgressDialog progressDialog = ProgressDialog.show(getContext(),null,
+                                                        getString(R.string.deleting_conversation));
+                                                CometChat.deleteConversation(
+                                                        finalConversationUid, finalType,
+                                                        new CometChat.CallbackListener<String>() {
+                                                            @Override
+                                                            public void onSuccess(String s) {
+                                                                Handler handler = new Handler();
+                                                                handler.postDelayed(new Runnable() {
+                                                                    public void run() {
+                                                                        alertDialog.dismiss();
+                                                                        progressDialog.dismiss();
+                                                                    }
+                                                                }, 1500);
+                                                                rvConversationList.remove(conversation);
+                                                            }
+
+                                                            @Override
+                                                            public void onError(CometChatException e) {
+                                                                progressDialog.dismiss();
+                                                                e.printStackTrace();
+                                                            }
+                                                        });
+                                            } else if (which==DialogInterface.BUTTON_NEGATIVE) {
+                                                alertDialog.dismiss();
+                                            }
+                                        }
+                                    }, 1, true);
+
+                                }
+                            }
+                        }
+                ));
+            }
+        };
+        swipeHelper.attachToRecyclerView(rvConversationList);
         return view;
     }
 
+    public void refreshConversation(CometChat.CallbackListener callbackListener) {
+        rvConversationList.clearList();
+        conversationList.clear();
+        conversationsRequest = null;
+        if (conversationsRequest == null) {
+            conversationsRequest = new ConversationsRequest.ConversationsRequestBuilder().setLimit(50).build();
+            if (conversationListType!=null)
+                conversationsRequest = new ConversationsRequest.ConversationsRequestBuilder()
+                        .setConversationType(conversationListType).setLimit(50).build();
+        }
+        conversationsRequest.fetchNext(new CometChat.CallbackListener<List<Conversation>>() {
+            @Override
+            public void onSuccess(List<Conversation> conversations) {
+                conversationList.addAll(conversations);
+                if (conversationList.size() != 0) {
+                    stopHideShimmer();
+                    noConversationView.setVisibility(View.GONE);
+                    rvConversationList.setConversationList(conversations);
+                } else {
+                    checkNoConverstaion();
+                }
+                callbackListener.onSuccess(conversationList);
+            }
+
+            @Override
+            public void onError(CometChatException e) {
+                stopHideShimmer();
+                if (getActivity()!=null)
+                    CometChatSnackBar.show(getContext(),rvConversationList,
+                            CometChatError.localized(e),CometChatSnackBar.ERROR);
+                Log.d(TAG, "onError: "+e.getMessage());
+                callbackListener.onError(e);
+            }
+        });
+    }
     private void checkDarkMode() {
         if(Utils.isDarkMode(getContext())) {
             tvTitle.setTextColor(getResources().getColor(R.color.textColorWhite));
@@ -146,6 +296,10 @@ public class CometChatConversationList extends Fragment implements TextWatcher {
         }
     }
 
+
+    public void setConversationListType(String conversationListType) {
+        this.conversationListType = conversationListType;
+    }
     /**
      * This method is used to retrieve list of conversations you have done.
      * For more detail please visit our official documentation {@link "https://prodocs.cometchat.com/docs/android-messaging-retrieve-conversations" }
@@ -156,6 +310,9 @@ public class CometChatConversationList extends Fragment implements TextWatcher {
 
         if (conversationsRequest == null) {
             conversationsRequest = new ConversationsRequest.ConversationsRequestBuilder().setLimit(50).build();
+            if (conversationListType!=null)
+                conversationsRequest = new ConversationsRequest.ConversationsRequestBuilder()
+                        .setConversationType(conversationListType).setLimit(50).build();
         }
         conversationsRequest.fetchNext(new CometChat.CallbackListener<List<Conversation>>() {
             @Override
@@ -174,7 +331,8 @@ public class CometChatConversationList extends Fragment implements TextWatcher {
             public void onError(CometChatException e) {
                 stopHideShimmer();
                 if (getActivity()!=null)
-                    Toast.makeText(getActivity(),"Unable to load conversations",Toast.LENGTH_LONG).show();
+                    CometChatSnackBar.show(getContext(),rvConversationList,
+                            getString(R.string.err_default_message),CometChatSnackBar.ERROR);
                 Log.d(TAG, "onError: "+e.getMessage());
             }
         });
@@ -367,7 +525,7 @@ public class CometChatConversationList extends Fragment implements TextWatcher {
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: ");
-
+        removeConversationListener();
     }
 
     @Override
@@ -390,6 +548,15 @@ public class CometChatConversationList extends Fragment implements TextWatcher {
         } else {
 //                    // Search conversation based on text in searchEdit field.
             rvConversationList.searchConversation(s.toString());
+        }
+    }
+
+    @Override
+    public void onButtonClick(AlertDialog alertDialog, View v, int which, int popupId) {
+        if (which== DialogInterface.BUTTON_NEGATIVE)
+            alertDialog.dismiss();
+        else if (which==DialogInterface.BUTTON_POSITIVE) {
+
         }
     }
 }

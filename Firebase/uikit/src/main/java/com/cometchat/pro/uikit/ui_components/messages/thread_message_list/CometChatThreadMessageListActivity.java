@@ -15,6 +15,7 @@ import androidx.emoji.bundled.BundledEmojiCompatConfig;
 import androidx.emoji.text.EmojiCompat;
 import androidx.fragment.app.Fragment;
 
+import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.uikit.R;
 
@@ -26,7 +27,7 @@ import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 import com.cometchat.pro.uikit.ui_components.messages.message_actions.listener.MessageActionCloseListener;
 import com.cometchat.pro.uikit.ui_components.messages.message_actions.listener.OnMessageLongClick;
 
-import com.cometchat.pro.uikit.ui_settings.UISettings;
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction;
 
 /**
 
@@ -39,7 +40,7 @@ import com.cometchat.pro.uikit.ui_settings.UISettings;
             It passes parameters like GUID (groupID) ,AVATAR (groupIcon) ,NAME (groupName) ,GROUP_OWNER (groupOwner) to CometChatMessageScreen.class
             if TYPE is CometChatConstant.RECEIVER_TYPE_GROUP
 
-            @see com.cometchat.pro.constants.CometChatConstants
+            @see CometChatConstants
             @see CometChatThreadMessageList
 
 
@@ -108,8 +109,8 @@ public class CometChatThreadMessageListActivity extends AppCompatActivity implem
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cometchat_message_list);
 
-        if (UISettings.getColor() !=null) {
-            getWindow().setStatusBarColor(Color.parseColor(UISettings.getColor()));
+        if (FeatureRestriction.getColor() !=null) {
+            getWindow().setStatusBarColor(Color.parseColor(FeatureRestriction.getColor()));
         }
         EmojiCompat.Config config = new BundledEmojiCompatConfig(this);
         EmojiCompat.init(config);
@@ -162,7 +163,7 @@ public class CometChatThreadMessageListActivity extends AppCompatActivity implem
                  pollResult = getIntent().getStringArrayListExtra(UIKitConstants.IntentStrings.POLL_RESULT);
              if (getIntent().hasExtra(UIKitConstants.IntentStrings.POLL_VOTE_COUNT))
                  voteCount = getIntent().getIntExtra(UIKitConstants.IntentStrings.POLL_VOTE_COUNT,0);
-             if (type.equals(com.cometchat.pro.constants.CometChatConstants.RECEIVER_TYPE_GROUP)) {
+             if (type.equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
                  if (getIntent().hasExtra(UIKitConstants.IntentStrings.GUID))
                      Id = getIntent().getStringExtra(UIKitConstants.IntentStrings.GUID);
              } else{
@@ -186,7 +187,7 @@ public class CometChatThreadMessageListActivity extends AppCompatActivity implem
                  bundle.putSerializable(UIKitConstants.IntentStrings.REACTION_INFO, reactionInfo);
              }
 
-             if (messageType.equals(com.cometchat.pro.constants.CometChatConstants.MESSAGE_TYPE_TEXT))
+             if (messageType.equals(CometChatConstants.MESSAGE_TYPE_TEXT))
                   bundle.putString(UIKitConstants.IntentStrings.TEXTMESSAGE,message);
              else if (messageType.equals(UIKitConstants.IntentStrings.LOCATION)) {
                   bundle.putDouble(UIKitConstants.IntentStrings.LOCATION_LATITUDE,latitude);
@@ -211,7 +212,7 @@ public class CometChatThreadMessageListActivity extends AppCompatActivity implem
              }
 
              fragment.setArguments(bundle);
-             getSupportFragmentManager().beginTransaction().replace(R.id.ChatFragment, fragment).commit();
+             getSupportFragmentManager().beginTransaction().replace(R.id.chat_fragment, fragment).commit();
          }
     }
 

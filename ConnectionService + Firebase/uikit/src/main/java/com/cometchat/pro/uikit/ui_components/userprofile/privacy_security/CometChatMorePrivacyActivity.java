@@ -9,24 +9,22 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cometchat.pro.core.BlockedUsersRequest;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
 import com.cometchat.pro.uikit.ui_components.users.block_users.CometChatBlockUserListActivity;
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils;
-import com.cometchat.pro.uikit.ui_settings.UISettings;
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction;
 import com.cometchat.pro.uikit.ui_resources.utils.Utils;
-
-import okhttp3.internal.Util;
 
 public class CometChatMorePrivacyActivity extends AppCompatActivity {
 
@@ -43,6 +41,7 @@ public class CometChatMorePrivacyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cometchat_more_privacy);
 
+        CometChatError.init(this);
         blockUserTv = findViewById(R.id.blocked_user_tv);
         tvBlockUserCount = findViewById(R.id.tv_blocked_user_count);
         MaterialToolbar toolbar = findViewById(R.id.privacy_toolbar);
@@ -52,9 +51,9 @@ public class CometChatMorePrivacyActivity extends AppCompatActivity {
          if (getSupportActionBar()!=null)
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        if (UISettings.getColor()!=null)
+        if (FeatureRestriction.getColor()!=null)
             getWindow().setStatusBarColor(
-                    Color.parseColor(UISettings.getColor()));
+                    Color.parseColor(FeatureRestriction.getColor()));
          if (Utils.changeToolbarFont(toolbar)!=null){
              Utils.changeToolbarFont(toolbar).setTypeface(FontUtils.getInstance(this).getTypeFace(FontUtils.robotoMedium));
          }
@@ -91,9 +90,9 @@ public class CometChatMorePrivacyActivity extends AppCompatActivity {
 
             @Override
             public void onError(CometChatException e) {
-                Utils.showCometChatDialog(CometChatMorePrivacyActivity.this,
-                        tvBlockUserCount,getResources().getString(R.string.block_user_list_error),true);
-                Toast.makeText(CometChatMorePrivacyActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+               CometChatSnackBar.show(CometChatMorePrivacyActivity.this,
+                        tvBlockUserCount,getResources().getString(R.string.block_user_list_error)+", "
+                               + CometChatError.localized(e), CometChatSnackBar.ERROR);
             }
         });
     }

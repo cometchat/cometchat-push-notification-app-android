@@ -51,6 +51,7 @@
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+        <include layout="@layout/cometchat_block_user_message_view"/>
         <com.cometchat.pro.uikit.ui_components.shared.cometchatSmartReplies.CometChatSmartReplies
             android:layout_width="match_parent"
             android:elevation="16dp"
@@ -86,7 +87,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </RelativeLayout>
-    <include layout="@layout/cometchat_block_user_message_view"/>
-
 
 </RelativeLayout>

@@ -21,6 +21,8 @@ import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.MessageReceipt;
 import com.cometchat.pro.uikit.ui_components.messages.message_information.Message_Receipts.CometChatReceiptsList;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
 import com.google.android.material.button.MaterialButton;
 
 import org.json.JSONException;
@@ -30,7 +32,7 @@ import java.util.List;
 
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 import com.cometchat.pro.uikit.ui_resources.utils.Utils;
-import com.cometchat.pro.uikit.ui_components.messages.extensions.Collaborative.CometChatCollaborativeActivity;
+import com.cometchat.pro.uikit.ui_components.messages.extensions.Collaborative.CometChatWebViewActivity;
 
 public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
 
@@ -166,8 +168,8 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(CometChatException e) {
-                    Utils.showCometChatDialog(CometChatMessageInfoScreenActivity.this,
-                            cometChatReceiptsList,e.getMessage(),true);
+                   CometChatSnackBar.show(CometChatMessageInfoScreenActivity.this,
+                            cometChatReceiptsList, CometChatError.localized(e), CometChatSnackBar.ERROR);
                 }
         });
     }
@@ -244,7 +246,7 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         String boardUrl = getIntent().getStringExtra(UIKitConstants.IntentStrings.TEXTMESSAGE);
-                        Intent intent = new Intent(CometChatMessageInfoScreenActivity.this, CometChatCollaborativeActivity.class);
+                        Intent intent = new Intent(CometChatMessageInfoScreenActivity.this, CometChatWebViewActivity.class);
                         intent.putExtra(UIKitConstants.IntentStrings.URL, boardUrl);
                         startActivity(intent);
                   }
@@ -256,7 +258,7 @@ public class CometChatMessageInfoScreenActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         String boardUrl = getIntent().getStringExtra(UIKitConstants.IntentStrings.TEXTMESSAGE);
-                        Intent intent = new Intent(CometChatMessageInfoScreenActivity.this, CometChatCollaborativeActivity.class);
+                        Intent intent = new Intent(CometChatMessageInfoScreenActivity.this, CometChatWebViewActivity.class);
                         intent.putExtra(UIKitConstants.IntentStrings.URL, boardUrl);
                         startActivity(intent);
                     }

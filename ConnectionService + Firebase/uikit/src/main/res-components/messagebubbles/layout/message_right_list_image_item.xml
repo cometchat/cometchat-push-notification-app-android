@@ -83,7 +83,6 @@
             tools:drawableEnd="@drawable/ic_double_tick"
             android:layout_alignBottom="@+id/cv_image_message_container"
             android:layout_toLeftOf="@+id/cv_image_message_container"
-            android:textColor="@color/secondaryTextColor"
             android:textStyle="bold"
             tools:visibility="visible"
             android:visibility="gone" />

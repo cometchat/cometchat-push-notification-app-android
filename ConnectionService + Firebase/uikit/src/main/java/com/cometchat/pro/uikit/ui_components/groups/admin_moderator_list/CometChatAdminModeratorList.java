@@ -1,5 +1,6 @@
 package com.cometchat.pro.uikit.ui_components.groups.admin_moderator_list;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
@@ -28,9 +28,10 @@ import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.GroupMember;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,6 +110,7 @@ public class CometChatAdminModeratorList extends Fragment {
         addAs = view.findViewById(R.id.add_as_tv);
         MaterialToolbar toolbar = view.findViewById(R.id.admin_toolbar);
         setToolbar(toolbar);
+        CometChatError.init(getContext());
         if (showModerators) {
             toolbar.setTitle(getResources().getString(R.string.moderators));
             addAs.setText(getResources().getString(R.string.assign_as_moderator));
@@ -165,7 +167,7 @@ public class CometChatAdminModeratorList extends Fragment {
                         else
                             message = getResources().getString(R.string.only_admin_removes_moderator);
 
-                        Utils.showCometChatDialog(getContext(),view,message,true);
+                        CometChatSnackBar.show(getContext(),view,message,CometChatSnackBar.WARNING);
                     }
                 }
                 else {
@@ -196,7 +198,7 @@ public class CometChatAdminModeratorList extends Fragment {
                         else
                             message = getResources().getString(R.string.only_group_owner_removes_admin);
 
-                        Utils.showCometChatDialog(getContext(),view,message,true);
+                        CometChatSnackBar.show(getContext(),view,message,CometChatSnackBar.WARNING);
                     }
                 }
             }
@@ -225,31 +227,41 @@ public class CometChatAdminModeratorList extends Fragment {
     }
 
     private void updateMemberScope(GroupMember groupMember, View view) {
+        ProgressDialog progressDialog;
+        if (showModerators)
+            progressDialog = ProgressDialog.show(getContext(),null,
+                    groupMember.getName()+" "+
+                            getResources().getString(R.string.remove_from_moderator_privilege));
+        else
+            progressDialog = ProgressDialog.show(getContext(),null,
+                    groupMember.getName()+" "+
+                            getResources().getString(R.string.removed_from_admin));
 
         CometChat.updateGroupMemberScope(groupMember.getUid(), guid, CometChatConstants.SCOPE_PARTICIPANT,
                 new CometChat.CallbackListener<String>() {
                     @Override
                     public void onSuccess(String s) {
+                        progressDialog.dismiss();
                         if (adapter != null)
                             adapter.removeGroupMember(groupMember);
-                        if (showModerators) {
-                            Utils.showCometChatDialog(getContext(),view,
-                                    groupMember.getName()+" "+getResources().getString(R.string.remove_from_moderator_privilege),
-                                    false);
-                        }
-                        else {
-                            Utils.showCometChatDialog(getContext(),view,
-                                    groupMember.getName()+" "+
-                                            getResources().getString(R.string.removed_from_admin),
-                                    false);
-                        }
+//                        if (showModerators) {
+//                            CometChatSnackBar.show(getContext(),view,
+//                                    groupMember.getName()+" "+getResources().getString(R.string.remove_from_moderator_privilege),
+//                                    CometChatSnackBar.SUCCESS);
+//                        }
+//                        else {
+//                            CometChatSnackBar.show(getContext(),view,
+//                                    groupMember.getName()+" "+
+//                                            getResources().getString(R.string.removed_from_admin),
+//                                    CometChatSnackBar.SUCCESS);
+//                        }
                     }
 
                     @Override
                     public void onError(CometChatException e) {
                         if (getActivity() != null) {
-                            Utils.showCometChatDialog(getContext(),
-                                    view,getString(R.string.update_group_member_error),true);
+                            CometChatSnackBar.show(getContext(),
+                                    view,getString(R.string.update_group_member_error)+", "+CometChatError.localized(e),CometChatSnackBar.ERROR);
                             Log.e(TAG, "onError: " + e.getMessage());
                         }
                     }
@@ -281,7 +293,7 @@ public class CometChatAdminModeratorList extends Fragment {
 
             @Override
             public void onError(CometChatException e) {
-                Utils.showCometChatDialog(getContext(),adminList, getResources().getString(R.string.admin_list_retrieve_error), true);
+                CometChatSnackBar.show(getContext(),adminList,CometChatError.localized(e), CometChatSnackBar.ERROR);
                 Log.e(TAG, "onError: " + e.getMessage());
 
             }
@@ -313,7 +325,8 @@ public class CometChatAdminModeratorList extends Fragment {
 
             @Override
             public void onError(CometChatException e) {
-                Utils.showCometChatDialog(getContext(),adminList, getResources().getString(R.string.moderator_list_retrieve_error),true);
+                CometChatSnackBar.show(getContext(),adminList,
+                        CometChatError.localized(e),CometChatSnackBar.ERROR);
                 Log.e(TAG, "onError: " + e.getMessage());
 
             }

@@ -25,11 +25,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.core.UsersRequest;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.ArrayList;
@@ -91,7 +94,7 @@ public class CometChatAddMembers extends Fragment {
         etSearch = view.findViewById(R.id.search_bar);
 
         toolbar = view.findViewById(R.id.add_member_toolbar);
-
+        CometChatError.init(getContext());
         setToolbar(toolbar);
 
         checkDarkMode();
@@ -164,8 +167,9 @@ public class CometChatAddMembers extends Fragment {
                     intent.putExtra(UIKitConstants.IntentStrings.NAME, user.getName());
                     intent.putExtra(UIKitConstants.IntentStrings.AVATAR, user.getAvatar());
                     intent.putExtra(UIKitConstants.IntentStrings.STATUS, user.getStatus());
+                    intent.putExtra(UIKitConstants.IntentStrings.LINK,user.getLink());
                     intent.putExtra(UIKitConstants.IntentStrings.IS_BLOCKED_BY_ME, user.isBlockedByMe());
-                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, com.cometchat.pro.constants.CometChatConstants.RECEIVER_TYPE_GROUP);
+                    intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP);
                     intent.putExtra(UIKitConstants.IntentStrings.GUID, guid);
                     intent.putExtra(UIKitConstants.IntentStrings.IS_ADD_MEMBER, true);
                     intent.putExtra(UIKitConstants.IntentStrings.GROUP_NAME, groupName);
@@ -228,7 +232,6 @@ public class CometChatAddMembers extends Fragment {
             int LIMIT = 30;
             usersRequest = new UsersRequest.UsersRequestBuilder().setLimit(LIMIT).build();
         }
-
         makeUserRequest(usersRequest);
     }
 
@@ -243,7 +246,8 @@ public class CometChatAddMembers extends Fragment {
 
             @Override
             public void onError(CometChatException e) {
-                Log.d(TAG, "onError: "+e.getMessage());
+                CometChatSnackBar.show(getContext(),rvUserList,
+                        CometChatError.localized(e),CometChatSnackBar.ERROR);
             }
         });
     }
@@ -266,7 +270,8 @@ public class CometChatAddMembers extends Fragment {
 
             @Override
             public void onError(CometChatException e) {
-                Log.e(TAG, "onError: "+e.getMessage());
+                CometChatSnackBar.show(getContext(),rvUserList,
+                        CometChatError.localized(e), CometChatSnackBar.ERROR);
             }
         });
     }

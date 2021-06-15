@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layoutDirection="ltr"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:gravity="end"
@@ -22,16 +23,13 @@
             android:layout_marginEnd="10dp"
             android:background="@drawable/cc_message_bubble_right">
             <include
-                android:layout_below="@+id/go_txt_message"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_margin="8dp"
                 layout="@layout/message_right_reply_item"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <TextView
+                android:layout_below="@+id/replyLayout"
                 android:maxWidth="270dp"
                 android:id="@+id/go_txt_message"
                 style="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
@@ -90,18 +88,19 @@
             android:visibility="gone"
             android:layout_width="24dp"
             android:layout_height="24dp"/>
+
         <TextView
             android:id="@+id/txt_time"
-            android:gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="11:00 PM"
-            android:layout_marginBottom="8dp"
-            android:textSize="12sp"
             android:layout_alignBottom="@+id/cv_message_container"
+            android:layout_marginBottom="8dp"
             android:layout_toLeftOf="@+id/cv_message_container"
+            android:gravity="center_vertical"
+            android:textSize="12sp"
             android:textStyle="bold"
-            tools:visibility="visible"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:text="11:00 PM"
+            tools:visibility="visible" />
     </RelativeLayout>
 </LinearLayout>

@@ -5,11 +5,17 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.Person;
+import androidx.core.graphics.drawable.IconCompat;
 
 import com.cometchat.pro.android.pushnotification.R;
 import com.cometchat.pro.android.pushnotification.constants.AppConfig;
@@ -21,6 +27,7 @@ import com.cometchat.pro.helpers.CometChatHelper;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MediaMessage;
+import com.cometchat.pro.uikit.ui_components.calls.call_manager.helper.CometChatAudioHelper;
 import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity;
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -36,6 +43,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
+
+import static java.lang.System.currentTimeMillis;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -102,6 +111,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 call = (Call)baseMessage;
                 isCall=true;
             }
+
             showNotifcation(baseMessage);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -149,18 +159,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
             PendingIntent messagePendingIntent = PendingIntent.getActivity(getApplicationContext(),
                     0123,messageIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"2")
                     .setSmallIcon(R.drawable.cc)
                     .setContentTitle(json.getString("title"))
                     .setContentText(json.getString("alert"))
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setColor(getResources().getColor(R.color.colorPrimary))
                     .setLargeIcon(getBitmapFromURL(baseMessage.getSender().getAvatar()))
                     .setGroup(GROUP_ID)
-                    .setContentIntent(messagePendingIntent)
-                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
             if (baseMessage.getType().equals(CometChatConstants.MESSAGE_TYPE_IMAGE)) {
                 builder.setStyle(new NotificationCompat.BigPictureStyle()
                         .bigPicture(getBitmapFromURL(((MediaMessage)baseMessage).getAttachment().getFileUrl())));
@@ -178,13 +185,26 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 if (json.getString("alert").equals("Incoming audio call") || json.getString("alert").equals("Incoming video call")) {
                     builder.setOngoing(true);
                     builder.setPriority(NotificationCompat.PRIORITY_HIGH);
-                    builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+                    Uri notification = Uri.parse("android.resource://" + getPackageName() + "/" +R.raw.incoming_call);
+                    builder.setCategory(NotificationCompat.CATEGORY_CALL);
+                    builder.setSound(notification);
                     builder.addAction(0, "Answers", PendingIntent.getBroadcast(getApplicationContext(), REQUEST_CODE, getCallIntent("Answers"), PendingIntent.FLAG_UPDATE_CURRENT));
                     builder.addAction(0, "Decline", PendingIntent.getBroadcast(getApplicationContext(), 1, getCallIntent("Decline"), PendingIntent.FLAG_UPDATE_CURRENT));
                 }
                 notificationManager.notify(05,builder.build());
             }
             else {
+//                Person person = createPerson(baseMessage);
+//                builder.setStyle(new NotificationCompat.MessagingStyle(person)
+//                        .setGroupConversation(true)
+//                        .setConversationTitle(json.getString("title"))
+//                        .addMessage(json.getString("alert"),
+//                                currentTimeMillis(), person));
+                builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+                builder.setContentIntent(messagePendingIntent);
+                builder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
+//                Uri notification = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.incoming_message);
+                builder.setDefaults(Notification.DEFAULT_VIBRATE);
                 notificationManager.notify(baseMessage.getId(), builder.build());
                 notificationManager.notify(0, summaryBuilder.build());
             }

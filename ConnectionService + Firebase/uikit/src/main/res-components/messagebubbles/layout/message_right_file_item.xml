@@ -61,7 +61,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
             <ImageView
-                android:id="@+id/ivIcon"
                 android:tint="@color/textColorWhite"
                 android:src="@drawable/ic_insert_drive_file_black_24dp"
                 android:layout_width="wrap_content"
@@ -131,7 +130,6 @@
             android:layout_alignBottom="@+id/cv_message_container"
             android:layout_marginBottom="8dp"
             android:textSize="12sp"
-            android:textColor="@color/secondaryTextColor"
             android:textStyle="bold"
             tools:visibility="visible"
             android:visibility="gone" />

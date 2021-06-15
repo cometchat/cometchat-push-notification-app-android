@@ -67,6 +67,8 @@ public class UIKitConstants {
 
         public static final String MESSAGE_TYPE_IMAGE_SIZE = "file_size";
 
+        public static final String MESSAGE = "message";
+
         public static final String SHOW_MODERATORLIST = "is_moderator";
 
         public static final String GROUP_DESC = "group_description";
@@ -93,7 +95,7 @@ public class UIKitConstants {
 
         public static final String CUSTOM_MESSAGE = "custom_message" ;
 
-        public static final String LOCATION = "LOCATION" ;
+        public static final String LOCATION = "location" ;
 
         public static final String LOCATION_LATITUDE = "latitude";
 
@@ -109,7 +111,7 @@ public class UIKitConstants {
 
         public static final String TRANSFER_OWNERSHIP = "transfer_ownership";
 
-        public static final String STICKERS = "Sticker";
+        public static final String STICKERS = "extension_sticker";
 
         public static final String REACTION_INFO = "reaction_info";
 
@@ -123,6 +125,13 @@ public class UIKitConstants {
 
         public static final String GROUP_CALL_TYPE = "group_call_type";
 
+        public static final String IS_DEFAULT_CALL = "is_default_call";
+
+        public static final String INTENT_MEDIA_IMAGE_MESSAGE = "intent_media_image_message";
+
+        public static final String INTENT_MEDIA_VIDEO_MESSAGE = "intent_media_video_message";
+
+        public static final String LINK = "link";
         public static final String CALL_TYPE = "call_type";
 
         public static String POLL_QUESTION = "poll_question";
@@ -162,8 +171,6 @@ public class UIKitConstants {
         public static final int RECORD = 003;
 
         public static final int LOCATION = 14;
-
-        public static final int CALL_PERMISSIONS = 94;
     }
     public static class MapUrl{
 

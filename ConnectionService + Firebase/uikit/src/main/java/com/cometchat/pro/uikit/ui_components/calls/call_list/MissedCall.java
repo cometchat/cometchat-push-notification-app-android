@@ -24,8 +24,10 @@ import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.User;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
 import com.cometchat.pro.uikit.ui_components.shared.cometchatCalls.CometChatCalls;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
 import com.cometchat.pro.uikit.ui_resources.utils.Utils;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -64,6 +66,7 @@ public class MissedCall extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_cometchat_missed_call, container, false);
         rvCallList = view.findViewById(R.id.callList_rv);
+        CometChatError.init(getContext());
         linearLayoutManager = new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false);
         rvCallList.setLayoutManager(linearLayoutManager);
         noCallView = view.findViewById(R.id.no_call_vw);
@@ -83,6 +86,7 @@ public class MissedCall extends Fragment {
                     intent.putExtra(UIKitConstants.IntentStrings.UID, user.getUid());
                     intent.putExtra(UIKitConstants.IntentStrings.NAME, user.getName());
                     intent.putExtra(UIKitConstants.IntentStrings.AVATAR, user.getAvatar());
+                    intent.putExtra(UIKitConstants.IntentStrings.LINK,user.getLink());
                     intent.putExtra(UIKitConstants.IntentStrings.STATUS, user.getStatus());
                     intent.putExtra(UIKitConstants.IntentStrings.IS_BLOCKED_BY_ME, user.isBlockedByMe());
                     intent.putExtra(UIKitConstants.IntentStrings.FROM_CALL_LIST,true);
@@ -166,7 +170,8 @@ public class MissedCall extends Fragment {
             @Override
             public void onError(CometChatException e) {
                 if (rvCallList != null)
-                    Utils.showCometChatDialog(getContext(),rvCallList,e.getMessage(),true);
+                    CometChatSnackBar.show(getContext(),rvCallList,CometChatError.localized(e)
+                            ,CometChatSnackBar.ERROR);
             }
         });
     }
@@ -194,7 +199,8 @@ public class MissedCall extends Fragment {
             @Override
             public void onError(CometChatException e) {
                 if (rvCallList!=null)
-                    Utils.showCometChatDialog(getContext(),rvCallList,getString(R.string.call_list_error),true);
+                    CometChatSnackBar.show(getContext(),rvCallList,
+                            CometChatError.localized(e),CometChatSnackBar.ERROR);
             }
         });
     }

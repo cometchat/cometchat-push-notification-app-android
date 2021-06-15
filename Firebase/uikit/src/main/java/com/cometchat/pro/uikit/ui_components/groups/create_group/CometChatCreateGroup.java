@@ -2,6 +2,7 @@ package com.cometchat.pro.uikit.ui_components.groups.create_group;
 
 import androidx.fragment.app.Fragment;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -12,23 +13,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 
 import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity;
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 import com.cometchat.pro.uikit.ui_resources.utils.Utils;
+
+import static com.cometchat.pro.uikit.ui_resources.utils.Utils.generateRandomString;
 
 /**
  * Purpose - CometChatCreateGroup class is a fragment used to create a group. User just need to enter
@@ -52,6 +60,8 @@ public class CometChatCreateGroup extends Fragment {
 
     private MaterialButton createGroupBtn;
 
+    private ArrayList<String> types = new ArrayList<>();
+
     private Spinner groupTypeSpinner;
 
     private String groupType;
@@ -63,7 +73,9 @@ public class CometChatCreateGroup extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.fragment_cometchat_create_group, container, false);
-
+        types.add(getString(R.string.public_group));
+        types.add(getString(R.string.private_group));
+        types.add(getString(R.string.password_protected_group));
         etGroupName = view.findViewById(R.id.group_name);
         etGroupDesc = view.findViewById(R.id.group_desc);
         etGroupPassword = view.findViewById(R.id.group_pwd);
@@ -91,6 +103,7 @@ public class CometChatCreateGroup extends Fragment {
 
         des2 = view.findViewById(R.id.tvDes2);
 
+        CometChatError.init(getContext());
         groupNameLayout = view.findViewById(R.id.input_group_name);
         groupDescLayout = view.findViewById(R.id.input_group_desc);
         groupPasswordLayout = view.findViewById(R.id.input_group_pwd);
@@ -100,15 +113,15 @@ public class CometChatCreateGroup extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position==0) {
-                    groupType = com.cometchat.pro.constants.CometChatConstants.GROUP_TYPE_PUBLIC;
+                    groupType = CometChatConstants.GROUP_TYPE_PUBLIC;
                     groupPasswordLayout.setVisibility(View.GONE);
                     groupCnfPasswordLayout.setVisibility(View.GONE);
                 } else if (position==1) {
-                    groupType = com.cometchat.pro.constants.CometChatConstants.GROUP_TYPE_PRIVATE;
+                    groupType = CometChatConstants.GROUP_TYPE_PRIVATE;
                     groupPasswordLayout.setVisibility(View.GONE);
                     groupCnfPasswordLayout.setVisibility(View.GONE);
                 } else if (position==2) {
-                    groupType = com.cometchat.pro.constants.CometChatConstants.GROUP_TYPE_PASSWORD;
+                    groupType = CometChatConstants.GROUP_TYPE_PASSWORD;
                     groupPasswordLayout.setVisibility(View.VISIBLE);
                     groupCnfPasswordLayout.setVisibility(View.VISIBLE);
                 }
@@ -119,6 +132,38 @@ public class CometChatCreateGroup extends Fragment {
 
             }
         });
+
+        ArrayAdapter adapter = new ArrayAdapter(
+                getContext(),android.R.layout.simple_list_item_1 ,types);
+
+        FeatureRestriction.isPublicGroupEnabled(new FeatureRestriction.OnSuccessListener() {
+            @Override
+            public void onSuccess(Boolean booleanVal) {
+                if (!booleanVal) {
+                    types.remove(getString(R.string.public_group));
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        });
+
+        FeatureRestriction.isPrivateGroupEnabled(new FeatureRestriction.OnSuccessListener() {
+            @Override
+            public void onSuccess(Boolean booleanVal) {
+                if (!booleanVal) {
+                    types.remove(getString(R.string.private_group));
+                    adapter.notifyDataSetChanged();                }
+            }
+        });
+
+        FeatureRestriction.isPasswordGroupEnabled(new FeatureRestriction.OnSuccessListener() {
+            @Override
+            public void onSuccess(Boolean booleanVal) {
+                if (!booleanVal) {
+                    types.remove(getString(R.string.password_protected_group));
+                    adapter.notifyDataSetChanged();                }
+            }
+        });
+        groupTypeSpinner.setAdapter(adapter);
         createGroupBtn = view.findViewById(R.id.btn_create_group);
 
         createGroupBtn.setOnClickListener(new View.OnClickListener() {
@@ -175,51 +220,25 @@ public class CometChatCreateGroup extends Fragment {
             etGroupCnfPassword.setTextColor(getResources().getColor(R.color.primaryTextColor));
         }
     }
-
-    /**
-     * This method is used to create group when called from layout. It uses <code>Random.nextInt()</code>
-     * to generate random number to use with group id and group icon. Any Random number between 10 to
-     * 1000 are choosen.
-     *
-     */
-
-    public static String generateRandomString(int length) {
-        if (length < 1) throw new IllegalArgumentException();
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            // 0-62 (exclusive), random returns 0-61
-            SecureRandom random = new SecureRandom();
-            String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
-            String CHAR_UPPER = CHAR_LOWER.toUpperCase();
-            String NUMBER = "0123456789";
-            String DATA_FOR_RANDOM_STRING = CHAR_LOWER + CHAR_UPPER + NUMBER;
-            int rndCharAt = random.nextInt(DATA_FOR_RANDOM_STRING.length());
-            char rndChar = DATA_FOR_RANDOM_STRING.charAt(rndCharAt);
-            // debug
-            System.out.format("%d\t:\t%c%n", rndCharAt, rndChar);
-            sb.append(rndChar);
-        }
-        return sb.toString();
-    }
-
     private void createGroup() {
         if (!etGroupName.getText().toString().isEmpty()) {
-            if(groupType.equals(com.cometchat.pro.constants.CometChatConstants.GROUP_TYPE_PUBLIC) || groupType.equals(com.cometchat.pro.constants.CometChatConstants.GROUP_TYPE_PRIVATE)) {
-                Group group = new Group("group" + generateRandomString(95), etGroupName.getText().toString(), groupType, "");
+            if(groupType.equals(CometChatConstants.GROUP_TYPE_PUBLIC) || groupType.equals(CometChatConstants.GROUP_TYPE_PRIVATE)) {
+                Group group = new Group("group" + generateRandomString(25), etGroupName.getText().toString(), groupType, "");
                 createGroup(group);
             }
-            else if (groupType.equals(com.cometchat.pro.constants.CometChatConstants.GROUP_TYPE_PASSWORD)) {
+            else if (groupType.equals(CometChatConstants.GROUP_TYPE_PASSWORD)) {
                 if(etGroupPassword.getText().toString().isEmpty())
                     etGroupPassword.setError(getResources().getString(R.string.fill_this_field));
                 else if (etGroupCnfPassword.getText().toString().isEmpty())
                     etGroupCnfPassword.setError(getResources().getString(R.string.fill_this_field));
                 else if(etGroupPassword.getText().toString().equals(etGroupCnfPassword.getText().toString())) {
-                    Group group = new Group("group" + generateRandomString(95), etGroupName.getText().toString(), groupType, etGroupPassword.getText().toString());
+                    Group group = new Group(generateRandomString(25), etGroupName.getText().toString(), groupType, etGroupPassword.getText().toString());
                     createGroup(group);
                 }
                 else
                     if (etGroupPassword!=null)
-                        Snackbar.make(etGroupCnfPassword.getRootView(),getResources().getString(R.string.password_not_matched),Snackbar.LENGTH_LONG).show();
+                        CometChatSnackBar.show(getContext(),etGroupCnfPassword.getRootView(),
+                                getResources().getString(R.string.password_not_matched),CometChatSnackBar.WARNING);
             }
         }
         else {
@@ -228,16 +247,19 @@ public class CometChatCreateGroup extends Fragment {
     }
 
     private void createGroup(Group group) {
+        ProgressDialog progressDialog = ProgressDialog.show(getContext(),null,
+                getString(R.string.creating_group));
         CometChat.createGroup(group, new CometChat.CallbackListener<Group>() {
             @Override
             public void onSuccess(Group group) {
+                progressDialog.dismiss();
                 Intent intent = new Intent(getActivity(), CometChatMessageListActivity.class);
                 intent.putExtra(UIKitConstants.IntentStrings.NAME,group.getName());
                 intent.putExtra(UIKitConstants.IntentStrings.GROUP_OWNER,group.getOwner());
                 intent.putExtra(UIKitConstants.IntentStrings.GUID,group.getGuid());
                 intent.putExtra(UIKitConstants.IntentStrings.AVATAR,group.getIcon());
                 intent.putExtra(UIKitConstants.IntentStrings.GROUP_TYPE,group.getGroupType());
-                intent.putExtra(UIKitConstants.IntentStrings.TYPE, com.cometchat.pro.constants.CometChatConstants.RECEIVER_TYPE_GROUP);
+                intent.putExtra(UIKitConstants.IntentStrings.TYPE, CometChatConstants.RECEIVER_TYPE_GROUP);
                 intent.putExtra(UIKitConstants.IntentStrings.MEMBER_COUNT,group.getMembersCount());
                 intent.putExtra(UIKitConstants.IntentStrings.GROUP_DESC,group.getDescription());
                 intent.putExtra(UIKitConstants.IntentStrings.GROUP_PASSWORD,group.getPassword());
@@ -249,7 +271,8 @@ public class CometChatCreateGroup extends Fragment {
 
             @Override
             public void onError(CometChatException e) {
-                Snackbar.make(etGroupName.getRootView(),getResources().getString(R.string.create_group_error),Snackbar.LENGTH_LONG).show();
+                CometChatSnackBar.show(getContext(),etGroupName.getRootView(),
+                        CometChatError.localized(e), CometChatSnackBar.ERROR);
                 Log.e(TAG, "onError: "+e.getMessage() );
             }
         });

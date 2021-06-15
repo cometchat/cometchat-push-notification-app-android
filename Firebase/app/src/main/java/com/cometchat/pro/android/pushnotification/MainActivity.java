@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void login(String uid) {
-        CometChat.login(uid, AppConfig.AppDetails.API_KEY, new CometChat.CallbackListener<User>() {
+        CometChat.login(uid, AppConfig.AppDetails.AUTH_KEY, new CometChat.CallbackListener<User>() {
             @Override
             public void onSuccess(User user) {
                 token = MyFirebaseMessagingService.token;

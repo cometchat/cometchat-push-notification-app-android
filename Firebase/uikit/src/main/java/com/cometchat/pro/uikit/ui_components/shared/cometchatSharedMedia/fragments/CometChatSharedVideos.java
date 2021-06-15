@@ -18,6 +18,9 @@ import com.cometchat.pro.core.MessagesRequest;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
+import com.cometchat.pro.uikit.ui_resources.utils.Utils;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -88,7 +91,7 @@ public class CometChatSharedVideos extends Fragment {
             @Override
             public void onError(CometChatException e) {
                 if (rvFiles!=null)
-                    Snackbar.make(rvFiles,"Failed to load Files",Snackbar.LENGTH_LONG).show();
+                   CometChatSnackBar.show(getContext(),rvFiles, CometChatError.localized(e), CometChatSnackBar.ERROR);
             }
         });
     }

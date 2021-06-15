@@ -43,7 +43,7 @@ public class CallNotificationAction extends BroadcastReceiver {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.cancel(05);
         }
-        else {
+        else if (intent.getAction().equals("Decline")){
             CometChat.rejectCall(sessionID, CometChatConstants.CALL_STATUS_REJECTED, new CometChat.CallbackListener<Call>() {
                 @Override
                 public void onSuccess(Call call) {

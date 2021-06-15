@@ -32,7 +32,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,6 +43,10 @@ import com.cometchat.pro.core.UsersRequest;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.models.User;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings;
+import com.cometchat.pro.uikit.ui_settings.enums.UserMode;
 import com.facebook.shimmer.ShimmerFrameLayout;
 
 import java.util.ArrayList;
@@ -53,7 +56,7 @@ import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUser
 import com.cometchat.pro.uikit.ui_components.shared.cometchatUsers.CometChatUsersAdapter;
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener;
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils;
-import com.cometchat.pro.uikit.ui_settings.UISettings;
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction;
 import com.cometchat.pro.uikit.ui_resources.utils.Utils;
 
 /*
@@ -120,6 +123,7 @@ public class CometChatUserList extends Fragment {
         clearSearch = view.findViewById(R.id.clear_search);
         rlSearchBox=view.findViewById(R.id.rl_search_box);
 
+        CometChatError.init(getContext());
         shimmerFrameLayout=view.findViewById(R.id.shimmer_layout);
 
         if(Utils.isDarkMode(getContext())) {
@@ -127,6 +131,16 @@ public class CometChatUserList extends Fragment {
         } else {
             title.setTextColor(getResources().getColor(R.color.primaryTextColor));
         }
+
+        FeatureRestriction.isUserSearchEnabled(new FeatureRestriction.OnSuccessListener() {
+            @Override
+            public void onSuccess(Boolean booleanVal) {
+                if (booleanVal)
+                    etSearch.setVisibility(View.VISIBLE);
+                else
+                    etSearch.setVisibility(View.GONE);
+            }
+        });
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -223,12 +237,10 @@ public class CometChatUserList extends Fragment {
     private void fetchUsers() {
 
         if (usersRequest == null) {
-            if (UISettings.getUserListing()
-                    .equalsIgnoreCase("friends"))
+            if (UIKitSettings.getUsersMode()==UserMode.FRIENDS)
                 usersRequest = new UsersRequest.UsersRequestBuilder().setLimit(30)
                         .friendsOnly(true).build();
-            else if (UISettings.getUserListing()
-                    .equalsIgnoreCase("all_users"))
+            else if (UIKitSettings.getUsersMode()==UserMode.ALL_USER)
                 usersRequest = new UsersRequest.UsersRequestBuilder().setLimit(30).build();
         }
         usersRequest.fetchNext(new CometChat.CallbackListener<List<User>>() {
@@ -253,7 +265,8 @@ public class CometChatUserList extends Fragment {
                 Log.e(TAG, "onError: " + e.getMessage());
                 stopHideShimmer();
                 if (getActivity()!=null)
-                Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                    CometChatSnackBar.show(context,rvUserList,CometChatError.localized(e),
+                            CometChatSnackBar.ERROR);
             }
         });
     }
@@ -275,7 +288,8 @@ public class CometChatUserList extends Fragment {
 
             @Override
             public void onError(CometChatException e) {
-                Toast.makeText(context, "Error " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                CometChatSnackBar.show(context,rlSearchBox, CometChatError.localized(e)
+                        , CometChatSnackBar.ERROR);
             }
         });
     }

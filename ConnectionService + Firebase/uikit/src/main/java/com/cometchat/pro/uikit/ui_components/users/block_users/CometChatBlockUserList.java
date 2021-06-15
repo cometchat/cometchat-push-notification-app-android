@@ -1,5 +1,6 @@
 package com.cometchat.pro.uikit.ui_components.users.block_users;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,9 +21,10 @@ import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,6 +80,7 @@ public class CometChatBlockUserList extends Fragment {
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar_blocked_user);
         setToolbar(toolbar);
 
+        CometChatError.init(getContext());
         rvUserList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -98,7 +101,8 @@ public class CometChatBlockUserList extends Fragment {
                 if (getActivity()!=null) {
                     MaterialAlertDialogBuilder alert = new MaterialAlertDialogBuilder(getActivity());
                     alert.setTitle(getResources().getString(R.string.unblock));
-                    alert.setMessage(String.format(getResources().getString(R.string.unblock_user_question),user.getName()));
+                    String message = String.format(getResources().getString(R.string.unblock_user_question),user.getName());
+                    alert.setMessage(message);
                     alert.setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -136,6 +140,8 @@ public class CometChatBlockUserList extends Fragment {
 
     private void unBlockUser(User user, View var1) {
 
+        ProgressDialog progressDialog = ProgressDialog.show(getContext(),null,
+                user.getName()+" "+getResources().getString(R.string.unblocked_successfully));
         ArrayList<String> uids = new ArrayList<>();
         uids.add(user.getUid());
         CometChat.unblockUsers(uids, new CometChat.CallbackListener<HashMap<String, String>>() {
@@ -144,15 +150,17 @@ public class CometChatBlockUserList extends Fragment {
                 if (userList.contains(user))
                     userList.remove(user);
                 blockedUserAdapter.removeUser(user);
-                Utils.showCometChatDialog(getContext(),var1,
-                        user.getName()+" "+getResources().getString(R.string.unblocked_successfully),false);
+                progressDialog.dismiss();
+//                CometChatSnackBar.show(getContext(),var1,
+//                        ,CometChatSnackBar.SUCCESS);
                 checkIfNoUserVisible();
             }
 
             @Override
             public void onError(CometChatException e) {
-                Utils.showCometChatDialog(getContext(),var1,
-                        getResources().getString(R.string.unblock_user_error),true);
+                progressDialog.dismiss();
+                CometChatSnackBar.show(getContext(),var1,
+                       CometChatError.localized(e),CometChatSnackBar.ERROR);
                 Log.e(TAG, "onError: "+e.getMessage());
             }
         });
@@ -180,8 +188,9 @@ public class CometChatBlockUserList extends Fragment {
             @Override
             public void onError(CometChatException e) {
                 Log.e(TAG, "onError: "+e.getMessage());
-                Utils.showCometChatDialog(getContext(),
-                        rvUserList,getResources().getString(R.string.block_user_list_error),true);
+                CometChatSnackBar.show(getContext(),
+                        rvUserList,getResources().getString(R.string.block_user_list_error)+", "+
+                        CometChatError.localized(e), CometChatSnackBar.ERROR);
             }
         });
     }

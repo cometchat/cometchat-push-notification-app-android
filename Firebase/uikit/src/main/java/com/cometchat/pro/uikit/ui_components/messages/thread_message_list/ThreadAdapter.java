@@ -34,6 +34,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.Attachment;
@@ -49,7 +50,7 @@ import com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAva
 import com.cometchat.pro.uikit.R;
 
 import com.cometchat.pro.uikit.ui_resources.utils.pattern_utils.PatternUtils;
-import com.cometchat.pro.uikit.ui_settings.UISettings;
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -407,7 +408,14 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 //            else
 //                viewHolder.txtTime.setVisibility(View.GONE);
 
-            viewHolder.length.setText(Utils.getFileSize(((MediaMessage)baseMessage).getAttachment().getFileSize()));
+            Attachment attachment = ((MediaMessage)baseMessage).getAttachment();
+            if (attachment!=null) {
+                viewHolder.playBtn.setVisibility(View.VISIBLE);
+                viewHolder.length.setText(Utils.getFileSize(((MediaMessage) baseMessage).getAttachment().getFileSize()));
+            } else {
+                viewHolder.length.setText("-");
+                viewHolder.playBtn.setVisibility(View.GONE);
+            }
             viewHolder.playBtn.setImageResource(R.drawable.ic_play_arrow_black_24dp);
             viewHolder.playBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -478,11 +486,14 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
               setAvatar(viewHolder.ivUser, baseMessage.getSender().getAvatar(), baseMessage.getSender().getName());
               viewHolder.tvUser.setText(baseMessage.getSender().getName());
 
-              viewHolder.fileName.setText(((MediaMessage) baseMessage).getAttachment().getFileName());
-              viewHolder.fileExt.setText(((MediaMessage) baseMessage).getAttachment().getFileExtension());
-              int fileSize = ((MediaMessage) baseMessage).getAttachment().getFileSize();
+              Attachment attachement = ((MediaMessage)baseMessage).getAttachment();
+              if (attachement!=null) {
+                  viewHolder.fileName.setText(attachement.getFileName());
+                  viewHolder.fileExt.setText(attachement.getFileExtension());
+                  int fileSize = attachement.getFileSize();
 
-              viewHolder.fileSize.setText(Utils.getFileSize(fileSize));
+                  viewHolder.fileSize.setText(Utils.getFileSize(fileSize));
+              }
 
               showMessageTime(viewHolder, baseMessage);
 
@@ -738,7 +749,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
      * Since we have different ViewHolder, we have to pass <b>txtTime</b> of each viewHolder to
      * <code>setStatusIcon(RecyclerView.ViewHolder viewHolder,BaseMessage baseMessage)</code>
      * along with baseMessage.
-     * @see ThreadAdapter#setStatusIcon(TextView, BaseMessage)
+     * @see ThreadAdapter#setStatusIcon(ProgressBar, TextView, BaseMessage)
      *      *
      * @param viewHolder is object of ViewHolder.
      * @param baseMessage is a object of BaseMessage.
@@ -872,10 +883,13 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 }
             }
             String message = txtMessage;
-            if (CometChat.isExtensionEnabled("profanity-filter"))
-                message = Extensions.checkProfanityMessage(baseMessage);
-            else if (CometChat.isExtensionEnabled("data-masking"))
-                message = Extensions.checkDataMasking(baseMessage);
+            if(CometChat.isExtensionEnabled("profanity-filter")) {
+                message = Extensions.checkProfanityMessage(context,baseMessage);
+            }
+
+            if(CometChat.isExtensionEnabled("data-masking")) {
+                message = Extensions.checkDataMasking(context,baseMessage);
+            }
 
             if (baseMessage.getMetadata()!=null && baseMessage.getMetadata().has("values")) {
                 try {
@@ -976,7 +990,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 Chip chip = new Chip(context);
                 chip.setChipStrokeWidth(2f);
                 chip.setChipBackgroundColor(ColorStateList.valueOf(context.getResources().getColor(android.R.color.transparent)));
-                chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor(UISettings.getColor())));
+                chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor(FeatureRestriction.getColor())));
                 chip.setText(str + " " + reactionOnMessage.get(str));
                 reactionLayout.addView(chip);
                 chip.setOnLongClickListener(new View.OnLongClickListener() {
@@ -1167,29 +1181,11 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return messageList.size();
     }
 
-//    @Override
-//    public long getHeaderId(int var1) {
-//
-//        BaseMessage baseMessage = messageList.get(var1);
-//        return Long.parseLong(Utils.getDateId(baseMessage.getSentAt() * 1000));
-//    }
-//
-//    @Override
-//    public DateItemHolder onCreateHeaderViewHolder(ViewGroup var1) {
-//        View view = LayoutInflater.from(var1.getContext()).inflate(R.layout.cc_message_list_header,
-//                var1, false);
-//
-//        return new DateItemHolder(view);
-//    }
-//
-//    @Override
-//    public void onBindHeaderViewHolder(DateItemHolder var1, int var2, long var3) {
-//        BaseMessage baseMessage = messageList.get(var2);
-//        Date date = new Date(baseMessage.getSentAt() * 1000L);
-//        String formattedDate = Utils.getDate(date.getTime());
-//        var1.txtMessageDate.setBackground(context.getResources().getDrawable(R.drawable.cc_rounded_date_button));
-//        var1.txtMessageDate.setText(formattedDate);
-//    }
+    public void remove(BaseMessage baseMessage) {
+        int index = messageList.indexOf(baseMessage);
+        messageList.remove(baseMessage);
+        notifyItemRemoved(index);
+    }
 
     /**
      * This method is used to maintain different viewType based on message category and type and
@@ -1211,29 +1207,29 @@ public class ThreadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         BaseMessage baseMessage = messageList.get(position);
         HashMap<String,JSONObject> extensionList = Extensions.extensionCheck(baseMessage);
         if (baseMessage.getDeletedAt()==0) {
-            if (baseMessage.getCategory().equals(com.cometchat.pro.constants.CometChatConstants.CATEGORY_MESSAGE)) {
+            if (baseMessage.getCategory().equals(CometChatConstants.CATEGORY_MESSAGE)) {
                 switch (baseMessage.getType()) {
 
-                    case com.cometchat.pro.constants.CometChatConstants.MESSAGE_TYPE_TEXT:
+                    case CometChatConstants.MESSAGE_TYPE_TEXT:
                         if (extensionList != null && extensionList.containsKey("linkPreview") && extensionList.get("linkPreview") != null)
                             return LINK_MESSAGE;
                         else if (baseMessage.getMetadata()!=null && baseMessage.getMetadata().has("reply"))
                             return REPLY_TEXT_MESSAGE;
                         else
                             return TEXT_MESSAGE;
-                    case com.cometchat.pro.constants.CometChatConstants.MESSAGE_TYPE_AUDIO:
+                    case CometChatConstants.MESSAGE_TYPE_AUDIO:
                         return AUDIO_MESSAGE;
-                    case com.cometchat.pro.constants.CometChatConstants.MESSAGE_TYPE_IMAGE:
+                    case CometChatConstants.MESSAGE_TYPE_IMAGE:
                         return IMAGE_MESSAGE;
-                    case com.cometchat.pro.constants.CometChatConstants.MESSAGE_TYPE_VIDEO:
+                    case CometChatConstants.MESSAGE_TYPE_VIDEO:
                         return VIDEO_MESSAGE;
-                    case com.cometchat.pro.constants.CometChatConstants.MESSAGE_TYPE_FILE:
+                    case CometChatConstants.MESSAGE_TYPE_FILE:
                         return FILE_MESSAGE;
                     default:
                         return -1;
                 }
             } else {
-                if (baseMessage.getCategory().equals(com.cometchat.pro.constants.CometChatConstants.CATEGORY_CUSTOM)){
+                if (baseMessage.getCategory().equals(CometChatConstants.CATEGORY_CUSTOM)){
                     if (baseMessage.getType().equalsIgnoreCase("LOCATION"))
                         return LOCATION_CUSTOM_MESSAGE;
                     else

@@ -29,7 +29,6 @@ import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.models.TextMessage;
 import com.cometchat.pro.models.User;
-import com.cometchat.pro.uikit.ui_components.calls.callconnection.MyConnectionService;
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 import com.cometchat.pro.uikit.ui_resources.utils.CallUtils;
 import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils;
@@ -57,11 +56,6 @@ public class PushNotificationActivity extends AppCompatActivity {
     private String receiver = CometChatConstants.RECEIVER_TYPE_USER;
     private TextInputLayout uidLayout;
     private ProgressDialog progressDialog;
-    private String[] callPermissions = new String[]{
-            Manifest.permission.MANAGE_OWN_CALLS,
-            Manifest.permission.CALL_PHONE,
-            Manifest.permission.READ_CALL_LOG,
-            Manifest.permission.READ_PHONE_STATE};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,13 +78,6 @@ public class PushNotificationActivity extends AppCompatActivity {
         audioCall = findViewById(R.id.audio_call);
         videoCall = findViewById(R.id.video_call);
         customMessage = findViewById(R.id.custom_message);
-
-        if (Utils.hasPermissions(PushNotificationActivity.this, callPermissions)) {
-
-        } else {
-            requestPermissions(callPermissions, UIKitConstants.RequestCode.CALL_PERMISSIONS);
-        }
-
         recieverType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup g, int checkedId) {
@@ -169,12 +156,8 @@ public class PushNotificationActivity extends AppCompatActivity {
                 if (uid.getText().toString().isEmpty()) {
                     uid.setError(getResources().getString(R.string.fill_this_field));
                 } else {
-                    if (Utils.hasPermissions(PushNotificationActivity.this, callPermissions)) {
-                        Call call = new Call(uid.getText().toString(), receiver, CometChatConstants.CALL_TYPE_AUDIO);
-                        initiateCall(call);
-                    } else {
-                        requestPermissions(callPermissions, UIKitConstants.RequestCode.CALL_PERMISSIONS);
-                    }
+                    Call call = new Call(uid.getText().toString(), receiver, CometChatConstants.CALL_TYPE_AUDIO);
+                    initiateCall(call);
                 }
             }
         });
@@ -184,13 +167,8 @@ public class PushNotificationActivity extends AppCompatActivity {
                 if (uid.getText().toString().isEmpty()) {
                     uid.setError(getResources().getString(R.string.fill_this_field));
                 } else {
-                    if (Utils.hasPermissions(PushNotificationActivity.this, callPermissions)) {
-                        Call call = new Call(uid.getText().toString(), receiver, CometChatConstants.CALL_TYPE_VIDEO);
-                        initiateCall(call);
-                    }
-                    else {
-                        requestPermissions(callPermissions, UIKitConstants.RequestCode.CALL_PERMISSIONS);
-                    }
+                    Call call = new Call(uid.getText().toString(), receiver, CometChatConstants.CALL_TYPE_VIDEO);
+                    initiateCall(call);
                 }
             }
         });
@@ -289,7 +267,7 @@ public class PushNotificationActivity extends AppCompatActivity {
             case UIKitConstants.RequestCode.GALLERY:
                 if (data != null) {
 
-                    File file = MediaUtils.getRealPath(PushNotificationActivity.this, data.getData());
+                    File file = MediaUtils.getRealPath(PushNotificationActivity.this, data.getData(),false);
                     ContentResolver cr = getContentResolver();
                     String mimeType = cr.getType(data.getData());
                     if (mimeType != null && mimeType.contains("image")) {

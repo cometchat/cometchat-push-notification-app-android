@@ -45,9 +45,40 @@ public class CallConnection extends Connection {
     }
 
 
-    public void destroyConnection() {
-        this.destroy();
+    @Override
+    public void onDisconnect() {
+        Log.i(TAG, "onDisconnect");
+        super.onDisconnect();
+        destroyConnection();
+        Log.e(TAG,"onDisconnect");
+        setDisconnected(new DisconnectCause(DisconnectCause.LOCAL, "Missed"));
+        if (CometChat.getActiveCall()!=null)
+            onDisconnect(CometChat.getActiveCall());
     }
+
+    void onDisconnect(Call call) {
+        Log.e(TAG,"onDisconnect Call: $call");
+        CometChat.rejectCall(call.getSessionId(), CometChatConstants.CALL_STATUS_CANCELLED,
+                new CometChat.CallbackListener<Call>() {
+                    @Override
+                    public void onSuccess(Call call) {
+                        Log.e(TAG, "onSuccess: reject");
+                    }
+
+                    @Override
+                    public void onError(CometChatException e) {
+                        Toast.makeText(context,"Unable to end call due to ${p0?.code}",
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    public void destroyConnection() {
+        setDisconnected(new DisconnectCause(DisconnectCause.REMOTE, "Rejected"));
+        Log.e(TAG, "destroyConnection" );
+        super.destroy();
+    }
+
     @Override
     public void onAnswer() {
         Log.i(TAG, "onAnswer"+call.getSessionId());
@@ -72,12 +103,6 @@ public class CallConnection extends Connection {
         }
     }
 
-    @Override
-    public void onDisconnect() {
-        Log.i(TAG, "onDisconnect");
-        destroyConnection();
-        setDisconnected(new DisconnectCause(DisconnectCause.MISSED,"Missed"));
-    }
 
     @Override
     public void onHold() {
@@ -109,5 +134,11 @@ public class CallConnection extends Connection {
                 }
             });
         }
+    }
+
+    public void onOutgoingReject() {
+        Log.e(TAG,"onDisconnect");
+        destroyConnection();
+        setDisconnected(new DisconnectCause(DisconnectCause.REMOTE, "REJECTED"));
     }
 }

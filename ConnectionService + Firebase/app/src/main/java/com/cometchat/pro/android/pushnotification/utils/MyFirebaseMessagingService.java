@@ -1,24 +1,34 @@
 package com.cometchat.pro.android.pushnotification.utils;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.Person;
+import androidx.core.graphics.drawable.IconCompat;
 
 import com.cometchat.pro.android.pushnotification.R;
-import com.cometchat.pro.android.pushnotification.UIKitApplication;
 import com.cometchat.pro.android.pushnotification.constants.AppConfig;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
+import com.cometchat.pro.core.CometChat;
+import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.helpers.CometChatHelper;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MediaMessage;
+import com.cometchat.pro.uikit.ui_components.calls.call_manager.helper.CometChatAudioHelper;
 import com.cometchat.pro.uikit.ui_components.calls.callconnection.CallManager;
 import com.cometchat.pro.uikit.ui_components.calls.callconnection.CallNotificationAction;
 import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity;
@@ -36,6 +46,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
+
+import static java.lang.System.currentTimeMillis;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -102,6 +114,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 call = (Call)baseMessage;
                 isCall=true;
             }
+
             showNotifcation(baseMessage);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -149,18 +162,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
             PendingIntent messagePendingIntent = PendingIntent.getActivity(getApplicationContext(),
                     0123,messageIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"2")
                     .setSmallIcon(R.drawable.cc)
                     .setContentTitle(json.getString("title"))
                     .setContentText(json.getString("alert"))
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setColor(getResources().getColor(R.color.colorPrimary))
                     .setLargeIcon(getBitmapFromURL(baseMessage.getSender().getAvatar()))
                     .setGroup(GROUP_ID)
-                    .setContentIntent(messagePendingIntent)
-                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
             if (baseMessage.getType().equals(CometChatConstants.MESSAGE_TYPE_IMAGE)) {
                 builder.setStyle(new NotificationCompat.BigPictureStyle()
                         .bigPicture(getBitmapFromURL(((MediaMessage)baseMessage).getAttachment().getFileUrl())));
@@ -174,25 +184,20 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
             if (isCall){
-                builder.setGroup(GROUP_ID+"Call");
-                if (json.getString("alert").equals("Incoming audio call") || json.getString("alert").equals("Incoming video call")) {
-                    builder.setOngoing(true);
-                    builder.setPriority(NotificationCompat.PRIORITY_HIGH);
-                    builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
-                    builder.addAction(0, "Answers", PendingIntent.getBroadcast(getApplicationContext(), REQUEST_CODE, getCallIntent("Answers"), PendingIntent.FLAG_UPDATE_CURRENT));
-                    builder.addAction(0, "Decline", PendingIntent.getBroadcast(getApplicationContext(), 1, getCallIntent("Decline"), PendingIntent.FLAG_UPDATE_CURRENT));
-                }
-                if (UIKitApplication.wasInBackground) {
-                    CallManager callManager = null;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        callManager = new CallManager(getApplicationContext());
-                        callManager.startIncomingCall(call);
-                    }
-                } else {
-                    notificationManager.notify(05, builder.build());
-                }
+                initiateCallService(call);
             }
             else {
+//                Person person = createPerson(baseMessage);
+//                builder.setStyle(new NotificationCompat.MessagingStyle(person)
+//                        .setGroupConversation(true)
+//                        .setConversationTitle(json.getString("title"))
+//                        .addMessage(json.getString("alert"),
+//                                currentTimeMillis(), person));
+                builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+                builder.setContentIntent(messagePendingIntent);
+                builder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
+//                Uri notification = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.incoming_message);
+                builder.setDefaults(Notification.DEFAULT_VIBRATE);
                 notificationManager.notify(baseMessage.getId(), builder.build());
                 notificationManager.notify(0, summaryBuilder.build());
             }
@@ -201,6 +206,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             e.printStackTrace();
         }
 
+    }
+
+    private void initiateCallService(Call call) {
+        try {
+            CallManager callManager;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Log.e("initiateCallService: ",call.toString());
+                callManager = new CallManager(getApplicationContext());
+                callManager.startIncomingCall(call);
+            }
+        } catch (Exception e) {
+            Log.e("initiateCallError:","${e.message}" );
+            Toast.makeText(getApplicationContext(), "Unable to receive call due to " +
+                    e.getMessage(), Toast.LENGTH_LONG);
+        }
     }
 
     private Intent getCallIntent(String title){

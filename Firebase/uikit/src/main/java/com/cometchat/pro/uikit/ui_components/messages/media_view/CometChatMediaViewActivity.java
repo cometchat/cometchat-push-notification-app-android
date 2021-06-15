@@ -24,6 +24,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.uikit.R;
 
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
@@ -32,7 +33,7 @@ import com.cometchat.pro.uikit.ui_resources.utils.zoom_imageView.ZoomImageView;
 
 public class CometChatMediaViewActivity extends AppCompatActivity {
 
-    private ZoomImageView imageMessage;
+    private ImageView imageMessage;
     private VideoView videoMessage;
     private Toolbar toolbar;
     private String senderName;
@@ -57,33 +58,23 @@ public class CometChatMediaViewActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         toolbar.getNavigationIcon().setTint(getResources().getColor(R.color.textColorWhite));
         toolbar.setTitle(senderName);
-        toolbar.setSubtitle(Utils.getLastMessageDate(sentAt));
+        toolbar.setSubtitle(Utils.getLastMessageDate(this,sentAt));
         imageMessage = findViewById(R.id.image_message);
         videoMessage = findViewById(R.id.video_message);
         audioMessage = findViewById(R.id.audio_message);
         mediaSize = findViewById(R.id.media_size_tv);
         playBtn = findViewById(R.id.playBtn);
-        if (mediaType.equals(com.cometchat.pro.constants.CometChatConstants.MESSAGE_TYPE_IMAGE)) {
+        if (mediaType.equals(CometChatConstants.MESSAGE_TYPE_IMAGE)) {
             Glide.with(this).asBitmap().load(mediaUrl)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE).into(new CustomTarget<Bitmap>() {
-                @Override
-                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                    imageMessage.setImageBitmap(resource);
-                }
-
-                @Override
-                public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                }
-            });
+                    .diskCacheStrategy(DiskCacheStrategy.NONE).into(imageMessage);
             imageMessage.setVisibility(View.VISIBLE);
-        } else if (mediaType.equals(com.cometchat.pro.constants.CometChatConstants.MESSAGE_TYPE_VIDEO)) {
+        } else if (mediaType.equals(CometChatConstants.MESSAGE_TYPE_VIDEO)) {
             MediaController mediacontroller = new MediaController(this);
             mediacontroller.setAnchorView(videoMessage);
             videoMessage.setMediaController(mediacontroller);
             videoMessage.setVideoURI(Uri.parse(mediaUrl));
             videoMessage.setVisibility(View.VISIBLE);
-        } else if (mediaType.equals(com.cometchat.pro.constants.CometChatConstants.MESSAGE_TYPE_AUDIO)) {
+        } else if (mediaType.equals(CometChatConstants.MESSAGE_TYPE_AUDIO)) {
             mediaPlayer.reset();
             mediaSize.setText(Utils.getFileSize(mSize));
             playBtn.setOnClickListener(new View.OnClickListener() {

@@ -3,10 +3,7 @@ package com.cometchat.pro.uikit.ui_components.calls.call_manager.listener;
 
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
 import android.widget.Toast;
-
-import androidx.annotation.RequiresApi;
 
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
@@ -17,8 +14,6 @@ import com.cometchat.pro.models.User;
 
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatCallActivity;
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatStartCallActivity;
-import com.cometchat.pro.uikit.ui_components.calls.callconnection.CallConnection;
-import com.cometchat.pro.uikit.ui_components.calls.callconnection.CallManager;
 import com.cometchat.pro.uikit.ui_components.calls.callconnection.MyConnectionService;
 import com.cometchat.pro.uikit.ui_resources.utils.CallUtils;
 
@@ -80,21 +75,19 @@ public class CometChatCallListener {
                 }
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onOutgoingCallRejected(Call call) {
-                Log.e(TAG, "onOutgoingCallRejected: " );
-                if (MyConnectionService.conn!=null)
-                MyConnectionService.conn.onDisconnect();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (MyConnectionService.conn != null)
+                        MyConnectionService.conn.onOutgoingReject();
+                }
                 if (CometChatCallActivity.callActivity!=null)
                     CometChatCallActivity.callActivity.finish();
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onIncomingCallCancelled(Call call){
-                Log.e(TAG, "onIncomingCallCancelled: " );
-                if (MyConnectionService.conn!=null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     MyConnectionService.conn.onDisconnect();
                 }
                 if (CometChatCallActivity.callActivity!=null)

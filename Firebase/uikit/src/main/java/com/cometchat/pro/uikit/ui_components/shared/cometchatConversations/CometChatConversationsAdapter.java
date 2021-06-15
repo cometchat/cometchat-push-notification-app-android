@@ -3,6 +3,7 @@ package com.cometchat.pro.uikit.ui_components.shared.cometchatConversations;
 import android.content.Context;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,9 +30,13 @@ import java.util.List;
 
 import com.cometchat.pro.uikit.databinding.CometchatConversationListRowBinding;
 import com.cometchat.pro.uikit.ui_components.messages.extensions.Extensions;
+import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils;
-import com.cometchat.pro.uikit.ui_settings.UISettings;
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction;
 import com.cometchat.pro.uikit.ui_resources.utils.Utils;
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings;
+
+import org.json.JSONObject;
 
 /**
  * Purpose - ConversationListAdapter is a subclass of RecyclerView Adapter which is used to display
@@ -127,8 +132,25 @@ public class CometChatConversationsAdapter extends RecyclerView.Adapter<CometCha
             category = baseMessage.getCategory();
             setStatusIcon(conversationViewHolder.conversationListRowBinding.messageTime,baseMessage);
             conversationViewHolder.conversationListRowBinding.messageTime.setVisibility(View.VISIBLE);
-            conversationViewHolder.conversationListRowBinding.messageTime.setText(Utils.getLastMessageDate(baseMessage.getSentAt()));
+            conversationViewHolder.conversationListRowBinding.messageTime.setText(Utils.getLastMessageDate(context,baseMessage.getSentAt()));
             lastMessageText=Utils.getLastMessage(context,baseMessage);
+
+            if (conversation.getLastMessage().getParentMessageId()!=0) {
+                conversationViewHolder.conversationListRowBinding.txtInThread.setVisibility(View.VISIBLE);
+            } else {
+                conversationViewHolder.conversationListRowBinding.txtInThread.setVisibility(View.GONE);
+            }
+
+            if (UIKitSettings.isHideDeleteMessage() && baseMessage.getDeletedAt()>0) {
+                conversationViewHolder.conversationListRowBinding.txtInThread.setVisibility(View.GONE);
+                conversationViewHolder.conversationListRowBinding.txtUserMessage
+                        .setVisibility(View.GONE);
+                lastMessageText = "";
+            } else {
+                conversationViewHolder.conversationListRowBinding.txtUserMessage
+                        .setVisibility(View.VISIBLE);
+            }
+
         } else {
             lastMessageText = context.getResources().getString(R.string.tap_to_start_conversation);
             conversationViewHolder.conversationListRowBinding.txtUserMessage.setMarqueeRepeatLimit(100);
@@ -136,6 +158,11 @@ public class CometChatConversationsAdapter extends RecyclerView.Adapter<CometCha
             conversationViewHolder.conversationListRowBinding.txtUserMessage.setSingleLine(true);
             conversationViewHolder.conversationListRowBinding.messageTime.setVisibility(View.GONE);
         }
+
+
+        if (lastMessageText.trim().isEmpty())
+            conversationViewHolder.conversationListRowBinding.txtInThread.setVisibility(View.GONE);
+
         conversationViewHolder.conversationListRowBinding.txtUserMessage.setText(lastMessageText);
         if (baseMessage!=null) {
             boolean isSentimentNegative = Extensions.checkSentiment(baseMessage);
@@ -148,9 +175,11 @@ public class CometChatConversationsAdapter extends RecyclerView.Adapter<CometCha
         conversationViewHolder.conversationListRowBinding.messageTime.setTypeface(fontUtils.getTypeFace(FontUtils.robotoRegular));
 
         if (conversation.getConversationType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
-            name = ((User) conversation.getConversationWith()).getName();
-            avatar = ((User) conversation.getConversationWith()).getAvatar();
-            status = ((User)conversation.getConversationWith()).getStatus();
+            User conversationUser = ((User) conversation.getConversationWith());
+            name = conversationUser.getName();
+            avatar = conversationUser.getAvatar();
+            status = conversationUser.getStatus();
+            Log.e("Conversation:",conversation.getConversationWith().toString());
             if (status.equals(CometChatConstants.USER_STATUS_ONLINE)) {
                 conversationViewHolder.conversationListRowBinding.userStatus.setVisibility(View.VISIBLE);
                 conversationViewHolder.conversationListRowBinding.userStatus.setUserStatus(status);
@@ -164,8 +193,7 @@ public class CometChatConversationsAdapter extends RecyclerView.Adapter<CometCha
 
         conversationViewHolder.conversationListRowBinding.messageCount.setCount(conversation.getUnreadMessageCount());
         conversationViewHolder.conversationListRowBinding.txtUserName.setText(name);
-        conversationViewHolder.conversationListRowBinding.avUser.setBackgroundColor(Color.parseColor(UISettings.getColor()));
-        conversationViewHolder.conversationListRowBinding.messageCount.setCountBackground(Color.parseColor(UISettings.getColor()));
+        conversationViewHolder.conversationListRowBinding.messageCount.setCountBackground(Color.parseColor(FeatureRestriction.getColor()));
 
 
         if (avatar != null && !avatar.isEmpty()) {
@@ -190,7 +218,7 @@ public class CometChatConversationsAdapter extends RecyclerView.Adapter<CometCha
                 baseMessage.getSender().getUid().equals(CometChat.getLoggedInUser().getUid())) {
 
             if (baseMessage.getReadAt() != 0) {
-                txtTime.setText(Utils.getLastMessageDate(baseMessage.getSentAt()));
+                txtTime.setText(Utils.getLastMessageDate(context,baseMessage.getSentAt()));
                 txtTime.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_double_tick, 0, 0, 0);
                 txtTime.setCompoundDrawablePadding(10);
             } else if (baseMessage.getDeliveredAt() != 0) {
@@ -299,7 +327,18 @@ public class CometChatConversationsAdapter extends RecyclerView.Adapter<CometCha
         if (filterConversationList.contains(conversation)) {
             Conversation oldConversation = filterConversationList.get(filterConversationList.indexOf(conversation));
             filterConversationList.remove(oldConversation);
-            conversation.setUnreadMessageCount(oldConversation.getUnreadMessageCount() + 1);
+            JSONObject metadata = conversation.getLastMessage().getMetadata();
+            boolean incrementUnreadCount = false;
+            boolean isCategoryMessage = conversation.getLastMessage().getCategory()
+                    .equalsIgnoreCase(CometChatConstants.CATEGORY_MESSAGE);
+            try {
+                if (metadata.has("incrementUnreadCount"))
+                    incrementUnreadCount = metadata.getBoolean("incrementUnreadCount");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (incrementUnreadCount || isCategoryMessage)
+                conversation.setUnreadMessageCount(oldConversation.getUnreadMessageCount() + 1);
             filterConversationList.add(0, conversation);
         } else {
             filterConversationList.add(0, conversation);
@@ -378,7 +417,11 @@ public class CometChatConversationsAdapter extends RecyclerView.Adapter<CometCha
         };
     }
 
-    class ConversationViewHolder extends RecyclerView.ViewHolder {
+    public Conversation getItemAtPosition(int position) {
+        return filterConversationList.get(position);
+    }
+
+    static class ConversationViewHolder extends RecyclerView.ViewHolder {
 
         CometchatConversationListRowBinding conversationListRowBinding;
 

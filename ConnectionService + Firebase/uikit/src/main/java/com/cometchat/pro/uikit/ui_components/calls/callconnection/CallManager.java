@@ -25,6 +25,7 @@ import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.BuildConfig;
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +45,7 @@ public class CallManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             phoneAccountHandle = new PhoneAccountHandle(componentName, context.getPackageName());
             PhoneAccount phoneAccount = PhoneAccount.builder(phoneAccountHandle, context.getPackageName())
-                        .setCapabilities(PhoneAccount.CAPABILITY_CONNECTION_MANAGER).build();
+                        .setCapabilities(UIKitSettings.getConnectionCapability()).build();
             Log.e( "CallManager: ",phoneAccount.toString() );
             telecomManager.registerPhoneAccount(phoneAccount);
         }

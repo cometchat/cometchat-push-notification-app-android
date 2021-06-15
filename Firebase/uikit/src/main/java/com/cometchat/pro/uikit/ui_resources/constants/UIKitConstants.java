@@ -31,7 +31,7 @@ public class UIKitConstants {
 
         public static final String tabBar = "tabBar";
 
-        public static final String[] EXTRA_MIME_DOC=new String[]{"text/plane","text/html","application/pdf","application/msword","application/vnd.ms.excel", "application/mspowerpoint","application/zip"};
+        public static final String[] EXTRA_MIME_DOC=new String[]{"text/plane","text/html","application/pdf","application/msword","application/vnd.ms.excel", "application/mspowerpoint","application/docs","application/vnd.openxmlformats-officedocument.wordprocessingml.document","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/zip"};
 
         public static final String MEMBER_COUNT = "member_count";
 
@@ -67,6 +67,8 @@ public class UIKitConstants {
 
         public static final String MESSAGE_TYPE_IMAGE_SIZE = "file_size";
 
+        public static final String MESSAGE = "message";
+
         public static final String SHOW_MODERATORLIST = "is_moderator";
 
         public static final String GROUP_DESC = "group_description";
@@ -93,7 +95,7 @@ public class UIKitConstants {
 
         public static final String CUSTOM_MESSAGE = "custom_message" ;
 
-        public static final String LOCATION = "LOCATION" ;
+        public static final String LOCATION = "location" ;
 
         public static final String LOCATION_LATITUDE = "latitude";
 
@@ -109,7 +111,7 @@ public class UIKitConstants {
 
         public static final String TRANSFER_OWNERSHIP = "transfer_ownership";
 
-        public static final String STICKERS = "Sticker";
+        public static final String STICKERS = "extension_sticker";
 
         public static final String REACTION_INFO = "reaction_info";
 
@@ -122,6 +124,14 @@ public class UIKitConstants {
         public static final String GROUP_CALL = "meeting" ;
 
         public static final String GROUP_CALL_TYPE = "group_call_type";
+
+        public static final String IS_DEFAULT_CALL = "is_default_call";
+
+        public static final String INTENT_MEDIA_IMAGE_MESSAGE = "intent_media_image_message";
+
+        public static final String INTENT_MEDIA_VIDEO_MESSAGE = "intent_media_video_message";
+
+        public static final String LINK = "link";
 
         public static String POLL_QUESTION = "poll_question";
 
@@ -165,7 +175,7 @@ public class UIKitConstants {
 
         public static final String MAPS_URL = "https://maps.googleapis.com/maps/api/staticmap?zoom=16&size=380x220&markers=color:red|";
 
-        public static final String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXX";
+        public static String MAP_ACCESS_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXXX";
     }
 
 

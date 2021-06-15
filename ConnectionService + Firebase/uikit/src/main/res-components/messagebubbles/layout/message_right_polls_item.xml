@@ -72,7 +72,6 @@
             android:layout_alignBottom="@+id/cv_message_container"
             android:layout_marginBottom="8dp"
             android:textSize="12sp"
-            android:textColor="@color/secondaryTextColor"
             android:textStyle="bold"/>
         <HorizontalScrollView
             android:layout_alignEnd="@id/cv_message_container"

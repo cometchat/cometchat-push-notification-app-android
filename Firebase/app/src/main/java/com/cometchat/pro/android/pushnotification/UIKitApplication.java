@@ -1,16 +1,15 @@
 package com.cometchat.pro.android.pushnotification;
 
-import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.DialogInterface;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Build;
-import android.os.StrictMode;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.Toast;
 import com.cometchat.pro.core.AppSettings;
 import com.cometchat.pro.core.CometChat;

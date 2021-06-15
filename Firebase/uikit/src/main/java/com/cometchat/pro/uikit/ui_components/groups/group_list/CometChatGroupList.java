@@ -24,24 +24,29 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.core.GroupsRequest;
 import com.cometchat.pro.exceptions.CometChatException;
+import com.cometchat.pro.models.Action;
+import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.models.Group;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
 import com.cometchat.pro.uikit.ui_components.shared.cometchatGroups.CometChatGroups;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
 import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClickListener;
 import com.cometchat.pro.uikit.ui_components.groups.create_group.CometChatCreateGroupActivity;
 import com.cometchat.pro.uikit.ui_resources.utils.FontUtils;
-import com.cometchat.pro.uikit.ui_settings.UISettings;
+import com.cometchat.pro.uikit.ui_settings.FeatureRestriction;
 import com.cometchat.pro.uikit.ui_resources.utils.Utils;
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings;
 
 /*
 
@@ -72,7 +77,11 @@ public class CometChatGroupList extends Fragment  {
 
     private List<Group> groupList = new ArrayList<>();
 
-    private static final String TAG = "CometChatGroupListScreen";
+    private static final String TAG = "CometChatGroupList";
+
+    private boolean isPublicGroupEnabled;
+    private boolean isPrivateGroupEnabled;
+    private boolean isPasswordGroupEnabled;
 
     public CometChatGroupList() {
         // Required empty public constructor
@@ -90,19 +99,57 @@ public class CometChatGroupList extends Fragment  {
         etSearch = view.findViewById(R.id.search_bar);
         clearSearch = view.findViewById(R.id.clear_search);
 
+        CometChatError.init(getContext());
         ivCreateGroup = view.findViewById(R.id.create_group);
-        ivCreateGroup.setImageTintList(ColorStateList.valueOf(Color.parseColor(UISettings.getColor())));
+        ivCreateGroup.setImageTintList(ColorStateList.valueOf(Color.parseColor(FeatureRestriction.getColor())));
 
-        if(UISettings.isGroupCreate())
-            ivCreateGroup.setVisibility(View.VISIBLE);
-        else
-            ivCreateGroup.setVisibility(View.GONE);
+        FeatureRestriction.isGroupSearchEnabled(new FeatureRestriction.OnSuccessListener() {
+            @Override
+            public void onSuccess(Boolean booleanVal) {
+                if (booleanVal)
+                    etSearch.setVisibility(View.VISIBLE);
+                else
+                    etSearch.setVisibility(View.GONE);
+            }
+        });
+        FeatureRestriction.isGroupCreationEnabled(new FeatureRestriction.OnSuccessListener() {
+            @Override
+            public void onSuccess(Boolean booleanVal) {
+                if (booleanVal)
+                    ivCreateGroup.setVisibility(View.VISIBLE);
+                else
+                    ivCreateGroup.setVisibility(View.GONE);
+
+            }
+        });
 
         if(Utils.isDarkMode(getContext())) {
             title.setTextColor(getResources().getColor(R.color.textColorWhite));
         } else {
             title.setTextColor(getResources().getColor(R.color.primaryTextColor));
         }
+
+        FeatureRestriction.isPublicGroupEnabled(new FeatureRestriction.OnSuccessListener() {
+            @Override
+            public void onSuccess(Boolean booleanVal) {
+                isPublicGroupEnabled = booleanVal;
+                checkGroups();
+            }
+        });
+        FeatureRestriction.isPrivateGroupEnabled(new FeatureRestriction.OnSuccessListener() {
+            @Override
+            public void onSuccess(Boolean booleanVal) {
+                isPrivateGroupEnabled = booleanVal;
+                checkGroups();
+            }
+        });
+        FeatureRestriction.isPasswordGroupEnabled(new FeatureRestriction.OnSuccessListener() {
+            @Override
+            public void onSuccess(Boolean booleanVal) {
+                isPasswordGroupEnabled = booleanVal;
+                checkGroups();
+            }
+        });
 
         ivCreateGroup.setOnClickListener(view1 -> {
             Intent intent = new Intent(getContext(), CometChatCreateGroupActivity.class);
@@ -180,6 +227,12 @@ public class CometChatGroupList extends Fragment  {
         return view;
     }
 
+    private void checkGroups() {
+        if (isPublicGroupEnabled || isPasswordGroupEnabled || isPrivateGroupEnabled) {
+            ivCreateGroup.setVisibility(View.VISIBLE);
+        } else
+            ivCreateGroup.setVisibility(View.GONE);
+    }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -199,8 +252,7 @@ public class CometChatGroupList extends Fragment  {
         groupsRequest.fetchNext(new CometChat.CallbackListener<List<Group>>() {
             @Override
             public void onSuccess(List<Group> groups) {
-                List<Group> filteredList = filterGroup(groups);
-                rvGroupList.setGroupList(filteredList); // sets the groups in rvGroupList i.e CometChatGroupList Component.
+                rvGroupList.setGroupList(groups); // sets the groups in rvGroupList i.e CometChatGroupList Component.
                 groupList.addAll(groups);
                 if (groupList.size()==0) {
                     noGroupLayout.setVisibility(View.VISIBLE);
@@ -213,7 +265,8 @@ public class CometChatGroupList extends Fragment  {
             @Override
             public void onError(CometChatException e) {
                 if (rvGroupList!=null)
-                    Snackbar.make(rvGroupList,getResources().getString(R.string.group_list_error),Snackbar.LENGTH_LONG).show();
+                    CometChatSnackBar.show(getContext(),
+                            rvGroupList, CometChatError.localized(e), CometChatSnackBar.ERROR);
             }
         });
     }
@@ -223,15 +276,15 @@ public class CometChatGroupList extends Fragment  {
             if (group.isJoined()) {
                 resultList.add(group);
             }
-            if (UISettings.getGroupListing()
+            if (UIKitSettings.getGroupsMode().toString()
                     .equalsIgnoreCase("public_groups") &&
                     group.getGroupType().equalsIgnoreCase(CometChatConstants.GROUP_TYPE_PUBLIC)) {
                 resultList.add(group);
-            } else if (UISettings.getGroupListing()
+            } else if (UIKitSettings.getGroupsMode().toString()
                     .equalsIgnoreCase("password_protected_groups") &&
                     group.getGroupType().equalsIgnoreCase(CometChatConstants.GROUP_TYPE_PASSWORD)) {
                 resultList.add(group);
-            } else if (UISettings.getGroupListing()
+            } else if (UIKitSettings.getGroupsMode().toString()
                     .equalsIgnoreCase("public_and_password_protected_groups")) {
                 resultList.add(group);
             }
@@ -258,7 +311,7 @@ public class CometChatGroupList extends Fragment  {
 
             @Override
             public void onError(CometChatException e) {
-                Log.d(TAG, "onError: "+e.getMessage());
+                Toast.makeText(getContext(),CometChatError.localized(e),Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -274,19 +327,69 @@ public class CometChatGroupList extends Fragment  {
         event=groupItemClickListener;
     }
 
+    public void addGroupListener(String TAG) {
+        CometChat.addGroupListener(TAG, new CometChat.GroupListener() {
+            @Override
+            public void onGroupMemberJoined(Action action, User joinedUser, Group joinedGroup) {
+                Log.e(TAG, "onGroupMemberJoined: "+joinedGroup.toString());
+                updateGroup(joinedGroup);
+            }
+
+            @Override
+            public void onGroupMemberLeft(Action action, User leftUser, Group leftGroup) {
+                Log.e(TAG, "onGroupMemberLeft: "+leftGroup.toString());
+                updateGroup(leftGroup);
+            }
+
+            @Override
+            public void onGroupMemberKicked(Action action, User kickedUser, User kickedBy, Group kickedFrom) {
+                Log.e(TAG, "onGroupMemberKicked: "+kickedFrom.toString());
+                updateGroup(kickedFrom);
+            }
+
+            @Override
+            public void onGroupMemberBanned(Action action, User bannedUser, User bannedBy, Group bannedFrom) {
+                Log.e(TAG, "onGroupMemberBanned: "+bannedFrom.toString());
+                updateGroup(bannedFrom);
+            }
+
+            @Override
+            public void onGroupMemberUnbanned(Action action, User unbannedUser, User unbannedBy, Group unbannedFrom) {
+                super.onGroupMemberUnbanned(action, unbannedUser, unbannedBy, unbannedFrom);
+            }
+        });
+    }
+
+    private void updateGroup(Group group) {
+        if (rvGroupList!= null) {
+            rvGroupList.update(group);
+        }
+    }
+
     @Override
     public void onStart() {
+        Log.e(TAG, "onStart: ");
         super.onStart();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        CometChat.removeGroupListener(TAG);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        CometChat.removeGroupListener(TAG);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         groupsRequest=null;
+        fetchGroup();
+        Log.e(TAG, "onResume: " );
+        addGroupListener(TAG);
     }
 }

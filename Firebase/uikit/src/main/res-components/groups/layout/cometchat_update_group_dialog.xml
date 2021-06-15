@@ -28,6 +28,7 @@
             android:layout_height="100dp"/>
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
+            android:visibility="gone"
             app:boxStrokeColor="@color/colorPrimary"
             app:boxStrokeWidth="1dp"
             android:layout_marginLeft="16dp"
@@ -35,7 +36,6 @@
             android:layout_marginTop="16dp"
             android:padding="8dp"
             android:hint="@string/enter_group_icon_url"
-            android:id="@+id/groupicon_url_tl"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_height="wrap_content">
             <com.google.android.material.textfield.TextInputEditText
@@ -54,7 +54,6 @@
             android:layout_marginRight="16dp"
             android:layout_marginTop="16dp"
             android:hint="@string/enter_group_name"
-            android:id="@+id/group_name_tl"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_height="wrap_content">
             <com.google.android.material.textfield.TextInputEditText
@@ -72,7 +71,6 @@
             android:layout_marginRight="16dp"
             android:layout_marginTop="16dp"
             android:hint="@string/enter_group_desc"
-            android:id="@+id/group_desc_tl"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_height="wrap_content">
             <com.google.android.material.textfield.TextInputEditText
@@ -159,7 +157,7 @@
             android:weightSum="2"
             android:layout_height="wrap_content">
             <com.google.android.material.button.MaterialButton
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/cancel"
@@ -167,7 +165,7 @@
                 android:layout_height="wrap_content"/>
             <com.google.android.material.button.MaterialButton
                 android:layout_width="wrap_content"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_weight="1"
                 android:id="@+id/updateGroupBtn"
                 android:textColor="@color/colorPrimary"

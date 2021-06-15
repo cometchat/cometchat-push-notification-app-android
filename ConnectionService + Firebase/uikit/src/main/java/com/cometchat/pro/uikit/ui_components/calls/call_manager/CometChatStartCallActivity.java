@@ -26,9 +26,11 @@ import com.cometchat.pro.core.CallSettings;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.models.User;
-import com.cometchat.pro.repo.SettingsRepo;
+import com.cometchat.pro.rtc.model.AudioMode;
 import com.cometchat.pro.uikit.R;
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.ongoing_call.OngoingCallService;
+import com.cometchat.pro.uikit.ui_components.shared.CometChatSnackBar;
+import com.cometchat.pro.uikit.ui_resources.utils.CometChatError;
 import com.cometchat.pro.uikit.ui_resources.utils.Utils;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -63,6 +65,8 @@ public class CometChatStartCallActivity extends AppCompatActivity {
 
     private Intent mServiceIntent;
 
+    private boolean isDefaultCall;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,7 +75,8 @@ public class CometChatStartCallActivity extends AppCompatActivity {
 
         ongoingCallService = new OngoingCallService();
         mServiceIntent = new Intent(this,ongoingCallService.getClass());
-        if (!isMyServiceRunning(ongoingCallService.getClass())) {
+        isDefaultCall = getIntent().getBooleanExtra(UIKitConstants.IntentStrings.IS_DEFAULT_CALL,false);
+        if (isDefaultCall && !isMyServiceRunning(ongoingCallService.getClass())) {
             startService(mServiceIntent);
         }
 
@@ -88,19 +93,41 @@ public class CometChatStartCallActivity extends AppCompatActivity {
             callSettings = new CallSettings.CallSettingsBuilder(this,mainView)
                     .setSessionId(sessionID)
                     .build();
+
+        CometChatError.init(this);
         Log.e( "startCallActivity: ",sessionID+" "+type);
         CometChat.startCall(callSettings, new CometChat.OngoingCallListener() {
             @Override
+            public void onAudioModesUpdated(List<AudioMode> list) {
+                Log.e( "onAudioModesUpdated: ",list.toString() );
+            }
+
+            @Override
+            public void onUserListUpdated(List<User> list) {
+                Log.e( "onUserListUpdated: ",list.toString() );
+            }
+
+            @Override
             public void onUserJoined(User user) {
                 connectingLayout.setVisibility(View.GONE);
+                CometChatSnackBar.show(CometChatStartCallActivity.this,
+                        mainView, getString(R.string.user_joined)+":"+ user.getName(),
+                        CometChatSnackBar.INFO);
                 Log.e("onUserJoined: ", user.getUid());
             }
 
             @Override
             public void onUserLeft(User user) {
                 if (user!=null) {
-                    Snackbar.make(mainView, "User Left: " + user.getName(), Snackbar.LENGTH_LONG).show();
+                    CometChatSnackBar.show(CometChatStartCallActivity.this,
+                            mainView, getString(R.string.user_left)+":"+ user.getName(),
+                            CometChatSnackBar.INFO);
                     Log.e("onUserLeft: ", user.getUid());
+                    if (callSettings.isDefaultLayout()) {
+                        endCall();
+                    }
+                } else {
+                    Log.e( "onUserLeft: ","triggered" );
                 }
             }
 
@@ -108,8 +135,8 @@ public class CometChatStartCallActivity extends AppCompatActivity {
             public void onError(CometChatException e) {
                 stopService(mServiceIntent);
                 Log.e("onstartcallError: ", e.getMessage());
-                Utils.showCometChatDialog(CometChatStartCallActivity.this,
-                        mainView,e.getCode()+" "+e.getMessage(), true);
+                CometChatSnackBar.show(CometChatStartCallActivity.this,
+                        mainView,CometChatError.localized(e), CometChatSnackBar.ERROR);
             }
 
             @Override
@@ -151,8 +178,8 @@ public class CometChatStartCallActivity extends AppCompatActivity {
 
             @Override
             public void onError(CometChatException e) {
-                Utils.showCometChatDialog(CometChatStartCallActivity.this,
-                        mainView,e.getCode()+" "+e.getMessage(), true);
+                CometChatSnackBar.show(CometChatStartCallActivity.this,
+                        mainView, CometChatError.localized(e), CometChatSnackBar.ERROR);
             }
         });
     }

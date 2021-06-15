@@ -267,7 +267,7 @@ public class PushNotificationActivity extends AppCompatActivity {
             case UIKitConstants.RequestCode.GALLERY:
                 if (data != null) {
 
-                    File file = MediaUtils.getRealPath(PushNotificationActivity.this, data.getData());
+                    File file = MediaUtils.getRealPath(PushNotificationActivity.this, data.getData(),false);
                     ContentResolver cr = getContentResolver();
                     String mimeType = cr.getType(data.getData());
                     if (mimeType != null && mimeType.contains("image")) {
