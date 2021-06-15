@@ -15,7 +15,7 @@
 ![GitHub stars](https://img.shields.io/github/stars/cometchat-pro/android-java-chat-push-notification-app?style=social)
 ![Twitter Follow](https://img.shields.io/twitter/follow/cometchat?style=social)
 
-<img align="left" src="Screenshot/screenshot.png">
+<img align="left" src="https://raw.githubusercontent.com/cometchat-pro/android-java-chat-push-notification-app/master/ConnectionService%20%2B%20Firebase/Screenshot/screenshot.png">
 
 
 CometChat Push Notification Sample App is a fully functional push notification app capable of one-on-one (private) and group messaging as well as Calling. This sample app enables users to send and receive push notifications for text and multimedia messages like **images, videos, documents as well as  Custom Messages** . Also, users can make push notifications for Audio and Video calls to other users or groups.
