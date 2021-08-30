@@ -467,7 +467,7 @@ public class UIKitSettings {
 
 
     public static void sendStickers(boolean isEnable) {
-         sendStickers = isEnable;
+        sendStickers = isEnable;
     }
 
     public static void unreadCount(boolean isEnable) { unreadCount = isEnable; }

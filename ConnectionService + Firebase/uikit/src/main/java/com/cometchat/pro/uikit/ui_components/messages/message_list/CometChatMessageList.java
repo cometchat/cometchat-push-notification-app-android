@@ -76,6 +76,7 @@ import com.cometchat.pro.models.GroupMember;
 import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.models.MessageReceipt;
 import com.cometchat.pro.models.TextMessage;
+import com.cometchat.pro.models.TransientMessage;
 import com.cometchat.pro.models.TypingIndicator;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.R;
@@ -327,6 +328,7 @@ public class CometChatMessageList extends Fragment implements View.OnClickListen
     private ImageView backIcon;
     private BaseMessage repliedMessage;
 
+    private boolean isLiveReactionEnded = true;
     public CometChatMessageList() {
         // Required empty public constructor
     }
@@ -430,50 +432,13 @@ public class CometChatMessageList extends Fragment implements View.OnClickListen
         }
 
         container = view.findViewById(R.id.reactions_container);
-        composeBox.liveReactionBtn.setOnTouchListener(new LiveReactionListener(700, 1000, new ReactionClickListener() {
+        composeBox.liveReactionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View var1) {
-                container.setAlpha(1.0f);
-                sendLiveReaction();
+            public void onClick(View v) {
+                if (isLiveReactionEnded)
+                    sendLiveReaction();
             }
-
-            @Override
-            public void onCancel(View var1) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (imageView != null && animation != null && animation.isRunning()) {
-                            ObjectAnimator animator = ObjectAnimator.ofFloat(container, "alpha", 0.2f);
-                            animator.setDuration(700);
-                            animator.start();
-                            animator.addListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    super.onAnimationEnd(animation);
-                                    if (imageView != null)
-                                        imageView.clearAnimation();
-                                    container.removeAllViews();
-                                    if (typingTimer != null)
-                                        typingTimer.schedule(new TimerTask() {
-                                            @Override
-                                            public void run() {
-                                                JSONObject metaData = new JSONObject();
-                                                try {
-                                                    metaData.put("reaction", "heart");
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
-                                                }
-                                                TypingIndicator typingIndicator = new TypingIndicator(Id, type, metaData);
-                                                CometChat.endTyping(typingIndicator);
-                                            }
-                                        }, 2000);
-                                }
-                            });
-                        }
-                    }
-                }, 1400);
-            }
-        }));
+        });
 
 
         newMessageLayout = view.findViewById(R.id.new_message_layout);
@@ -635,8 +600,7 @@ public class CometChatMessageList extends Fragment implements View.OnClickListen
     }
 
     private void checkOnGoingCall(String callType) {
-        if (CometChat.getActiveCall() != null &&
-                CometChat.getActiveCall().getCallStatus().equals(CometChatConstants.CALL_STATUS_ONGOING) && CometChat.getActiveCall().getSessionId() != null) {
+        if (CometChat.getActiveCall() != null && CometChat.getActiveCall().getCallStatus().equals(CometChatConstants.CALL_STATUS_ONGOING) && CometChat.getActiveCall().getSessionId() != null) {
             AlertDialog.Builder alert = new AlertDialog.Builder(context);
             alert.setTitle(getResources().getString(R.string.ongoing_call))
                     .setMessage(getResources().getString(R.string.ongoing_call_message))
@@ -2056,13 +2020,8 @@ public class CometChatMessageList extends Fragment implements View.OnClickListen
      * @param baseMessage is object of BaseMessage.class. It is message which is been marked as read.
      */
     private void markMessageAsRead(BaseMessage baseMessage) {
-//        CometChat.markAsRead(baseMessage);  //Used for v3
-                if (type.equals(CometChatConstants.RECEIVER_TYPE_USER))
-                    CometChat.markAsRead(baseMessage.getId(), baseMessage.getSender().getUid(),
-                            baseMessage.getReceiverType());
-                else
-                    CometChat.markAsRead(baseMessage.getId(), baseMessage.getReceiverUid(),
-                            baseMessage.getReceiverType());
+        CometChat.markAsDelivered(baseMessage);
+        CometChat.markAsRead(baseMessage);
     }
 
 
@@ -2132,6 +2091,12 @@ public class CometChatMessageList extends Fragment implements View.OnClickListen
                         messageAdapter.remove(message);
                     else
                         updateMessage(message);
+                }
+            }
+            @Override
+            public void onTransientMessageReceived(TransientMessage transientMessage) {
+                if (transientMessage.getData()!=null) {
+                    setLiveReaction();
                 }
             }
         });
@@ -2260,8 +2225,7 @@ public class CometChatMessageList extends Fragment implements View.OnClickListen
                             }
                         });
                     }
-                    else
-                        setLiveReaction();
+
                 } else {
                     if (typingIndicator.getMetadata() == null) {
                         FeatureRestriction.isTypingIndicatorsEnabled(new FeatureRestriction.OnSuccessListener() {
@@ -2272,44 +2236,14 @@ public class CometChatMessageList extends Fragment implements View.OnClickListen
                             }
                         });
                     }
-                    else
-                        setLiveReaction();
                 }
             } else {
                 if (typingIndicator.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
                     if (typingIndicator.getMetadata() == null)
                         tvStatus.setText(status);
-                    else {
-                        ObjectAnimator animator = ObjectAnimator.ofFloat(container,"alpha",0.2f);
-                        animator.setDuration(700);
-                        animator.start();
-                        animator.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                super.onAnimationEnd(animation);
-                                if (imageView!=null)
-                                    imageView.clearAnimation();
-                                container.removeAllViews();
-                            }
-                        });
-                    }
                 } else{
                     if (typingIndicator.getMetadata() == null)
                         tvStatus.setText(memberNames);
-                    else {
-                        ObjectAnimator animator = ObjectAnimator.ofFloat(container,"alpha",0.2f);
-                        animator.setDuration(700);
-                        animator.start();
-                        animator.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                super.onAnimationEnd(animation);
-                                if (imageView!=null)
-                                    imageView.clearAnimation();
-                                container.removeAllViews();
-                            }
-                        });
-                    }
                 }
             }
 
@@ -3400,20 +3334,43 @@ public class CometChatMessageList extends Fragment implements View.OnClickListen
         try {
             JSONObject metaData = new JSONObject();
             metaData.put("reaction", "heart");
-            TypingIndicator typingIndicator = new TypingIndicator(Id, type, metaData);
-            CometChat.startTyping(typingIndicator);
+            metaData.put("type","live_reaction");
+            TransientMessage transientMessage = new TransientMessage(Id, type, metaData);
+            CometChat.sendTransientMessage(transientMessage);
             setLiveReaction();
         } catch (Exception e) {
             Log.e(TAG, "sendLiveReaction: "+e.getMessage());
         }
     }
 
+    private void stopLiveReaction() {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(container,"alpha",0.2f);
+        animator.setDuration(700);
+        animator.start();
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if (imageView!=null)
+                    imageView.clearAnimation();
+                container.removeAllViews();
+                isLiveReactionEnded = true;
+            }
+        });
+    }
     private void setLiveReaction() {
         container.setAlpha(1.0f);
-        flyEmoji(R.drawable.heart_reaction);
+        isLiveReactionEnded = false;
+        animateLiveReaction(R.drawable.heart_reaction);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                stopLiveReaction();
+            }
+        },1500);
     }
 
-    private void flyEmoji(final int resId) {
+    private void animateLiveReaction(final int resId) {
         imageView = new ImageView(getContext());
 
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);

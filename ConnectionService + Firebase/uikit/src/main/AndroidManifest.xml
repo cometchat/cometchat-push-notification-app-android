@@ -26,13 +26,15 @@
         android:usesCleartextTraffic="true"
         tools:node="merge"
         tools:targetApi="m">
-        <activity android:name=".ui_components.messages.extensions.Collaborative.CometChatWebViewActivity"/>
-        <activity
-            android:name=".ui_components.messages.extensions.Reactions.CometChatReactionInfoActivity"/>
+        <activity android:name=".ui_components.chats.CometChatStartConversation"/>
+        <activity android:name=".ui_components.messages.extensions.Collaborative.CometChatWebViewActivity" />
+        <activity android:name=".ui_components.messages.extensions.Reactions.CometChatReactionInfoActivity" />
         <activity android:name=".ui_components.messages.media_view.CometChatMediaViewActivity" />
         <activity android:name=".ui_components.messages.message_information.CometChatMessageInfoScreenActivity" />
-        <activity android:name=".ui_components.calls.call_manager.CometChatStartCallActivity"
-            android:launchMode="singleTask" />
+        <activity
+            android:name=".ui_components.calls.call_manager.CometChatStartCallActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui_components.messages.thread_message_list.CometChatThreadMessageListActivity"
             android:windowSoftInputMode="adjustResize" />
@@ -55,7 +57,7 @@
                 <data android:mimeType="image/*" />
                 <data android:mimeType="video/*" />
                 <data android:mimeType="audio/*" />
-                <data android:mimeType="application/pdf" />
+                <data android:mimeType="application/*" />
             </intent-filter>
         </activity>
         <meta-data

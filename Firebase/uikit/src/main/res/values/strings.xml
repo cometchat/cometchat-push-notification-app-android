@@ -342,5 +342,5 @@
     <string name="search_users">Search Users</string>
     <string name="search_groups">Search Groups</string>
     <string name="background_location_permission_title">Allow Background Location Permisssion</string>
-    <string name="allow_connection_service">Please enable VoIP for this app</string>
+    <string name="allow_connection_service">Please enable VoIP from Call Accounts Settings</string>
 </resources>
