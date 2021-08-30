@@ -1,5 +1,9 @@
 package com.cometchat.pro.uikit.ui_components.calls.callconnection;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,10 +15,14 @@ import android.telecom.TelecomManager;
 import android.telecom.VideoProfile;
 import android.util.Log;
 import android.view.Surface;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
 import com.cometchat.pro.core.Call;
+import com.cometchat.pro.core.CometChat;
+import com.cometchat.pro.exceptions.CometChatException;
+import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatStartCallActivity;
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 
 import static android.telecom.TelecomManager.PRESENTATION_ALLOWED;
@@ -27,6 +35,7 @@ public class MyConnectionService extends ConnectionService {
         super();
     }
 
+
     @Override
     public Connection onCreateIncomingConnection(PhoneAccountHandle connectionManagerPhoneAccount, ConnectionRequest request) {
         Bundle bundle = request.getExtras();
@@ -38,7 +47,7 @@ public class MyConnectionService extends ConnectionService {
         Call call = new Call(receiverUID,type,callType);
         call.setSessionId(sessionID);
         Log.i("CallConnectionService", "onCreateIncomingConnectionCall:"+call.toString());
-        conn = new CallConnection(getApplicationContext(),call);
+        conn = new CallConnection(this,call);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             conn.setConnectionProperties(Connection.PROPERTY_SELF_MANAGED);
         }

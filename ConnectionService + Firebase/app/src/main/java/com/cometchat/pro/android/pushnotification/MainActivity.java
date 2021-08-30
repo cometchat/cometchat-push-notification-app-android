@@ -21,8 +21,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (CometChat.getLoggedInUser()!=null)
-            startActivity(new Intent(MainActivity.this,PushNotificationActivity.class));
+            startActivity(new Intent(MainActivity.this, PushNotificationActivity.class));
         loginBtn = findViewById(R.id.login);
         superhero1 = findViewById(R.id.superhero1);
         superhero2 = findViewById(R.id.superhero2);
@@ -92,18 +91,18 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(User user) {
                 token = MyFirebaseMessagingService.token;
                 if (token==null) {
-                    FirebaseInstanceId.getInstance().getInstanceId()
-                            .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                                @Override
-                                public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                                    if (!task.isSuccessful()) {
-                                        Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                                        return;
-                                    }
-                                    token = task.getResult().getToken();
-                                    registerPushNotification(uid,token);
-                                }
-                            });
+                    FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                        @Override
+                        public void onComplete(@NonNull Task<String> task) {
+                            if (!task.isSuccessful()) {
+                                Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            token = task.getResult();
+                            Log.e(TAG, "onComplete: "+token);
+                            registerPushNotification(uid,token);
+                        }
+                    });
                 } else {
                     registerPushNotification(uid,token);
                 }

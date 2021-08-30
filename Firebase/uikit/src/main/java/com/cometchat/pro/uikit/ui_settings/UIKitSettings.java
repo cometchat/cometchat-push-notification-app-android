@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.telecom.PhoneAccount;
 import android.widget.Toast;
 
 import com.cometchat.pro.constants.CometChatConstants;
@@ -32,6 +33,9 @@ public class UIKitSettings {
     private static boolean conversations = true;
     private static boolean calls = true;
     private static boolean userSettings = true;
+
+    private static boolean startConversation = true;
+    private static boolean deleteConversation = true;
 
     private static boolean sendMessageInOneOneOne = true;
     private static boolean sendMessageInGroup = true;
@@ -123,6 +127,7 @@ public class UIKitSettings {
     protected static ConversationMode conversationInMode = ConversationMode.ALL_CHATS;
     protected static GroupMode groupInMode = GroupMode.ALL_GROUP;
     protected static UserMode userInMode = UserMode.ALL_USER;
+    private static int connectionCapability = PhoneAccount.CAPABILITY_CALL_PROVIDER;
 
     public Context context;
 
@@ -176,6 +181,14 @@ public class UIKitSettings {
 
     public static void showReplyPrivately(boolean isEnable) {
         showReplyPrivately = isEnable;
+    }
+
+    public static String getColor() {
+        return UIcolor;
+    }
+
+    public static int getConnectionCapability() {
+        return connectionCapability;
     }
 
     public void addConnectionListener(String TAG) {
@@ -327,6 +340,15 @@ public class UIKitSettings {
 
     public static void setColor(String color) {
         UIcolor = color;
+    }
+
+
+    public static void deleteConversation(boolean isEnabled) {
+        deleteConversation = isEnabled;
+    }
+
+    public static void startConversation(boolean isEanbled) {
+        startConversation = isEanbled;
     }
 
     public static void users(boolean showUsers) {
@@ -904,4 +926,11 @@ public class UIKitSettings {
         return hideDeleteMessage;
     }
 
+    public static boolean isDeleteConversation() {
+        return deleteConversation;
+    }
+
+    public static boolean isStartConversation() {
+        return startConversation;
+    }
 }

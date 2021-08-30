@@ -126,6 +126,12 @@
     <string name="audio_call">Audio Call</string>
     <string name="missed_voice_call">Missed voice call</string>
     <string name="missed_video_call">Missed video call</string>
+    <string name="rejected_voice_call">Rejected voice call</string>
+    <string name="rejected_video_call">Rejected video call</string>
+    <string name="outgoing_voice_call">Outgoing voice call</string>
+    <string name="outgoing_video_call">Outgoing video call</string>
+    <string name="incoming_audio_call">Incoming Audio Call</string>
+    <string name="incoming_video_call">Incoming Video Call</string>
 
     <!--Calls -->
     <string name="no_call_message">You have not made any calls</string>
@@ -137,8 +143,6 @@
     <string name="all">All</string>
     <string name="missed">Missed</string>
     <string name="new_call">New Call</string>
-    <string name="incoming_audio_call">Incoming Audio Call</string>
-    <string name="incoming_video_call">Incoming Video Call</string>
     <string name="missed_call">Missed</string>
     <string name="rejected_call">Rejected</string>
     <string name="ongoing_call">Call is Ongoing</string>
@@ -249,6 +253,7 @@
     <string name="yesterday">Yesterday</string>
     <string name="ban">Ban</string>
     <string name="banned_successfully">Banned Successfully</string>
+    <string name="no_banned_members_found">No Banned Members Found</string>
     <string name="unblocked_successfully">unblocked successfully</string>
     <string name="forward_to_5_at_a_time">You cannot forward message to more than 5 members</string>
     <string name="message_audio">🎵 Audio</string>
@@ -273,11 +278,11 @@
     <string name="joined">joined</string>
     <string name="unban">Unban</string>
     <string name="made">made</string>
-    <string name="participant">participant</string>
+    <string name="participant">Participant</string>
     <string name="translate_message">Translate Message</string>
     <string name="no_translation_available">No translation available</string>
-    <string name="has_shared_group_call">has shared a group call.</string>
-    <string name="you_created_group_call">You\'ve created a group call.</string>
+    <string name="has_shared_group_call">has initiated a group call.</string>
+    <string name="you_created_group_call">You\'ve initiated a group call.</string>
     <string name="custom_message_meeting">"📹 Group Call "</string>
     <string name="retry">Retry</string>
     <string name="uploading">Uploading</string>
@@ -312,7 +317,7 @@
 
     <string name="downloading">Downloading</string>
     <string name="creating_group">Creating Group</string>
-    <string name="reply_privately">Send Message Privately</string>
+    <string name="send_message_privately">Send Message Privately</string>
     <string name="view_profile">View Profile</string>
     <string name="today">Today</string>
     <string name="in_thread">In a thread</string>
@@ -331,6 +336,11 @@
     <string name="new_message"> New Message</string>
     <string name="new_messages">" New Messages"</string>
     <string name="offline">offline</string>
-    <string name="reply_in_thread">Reply in Thread</string>
     <string name="err_internet_unavailable">No Internet Available</string>
+    <string name="select_user">Select User</string>
+    <string name="select_group">Select Group</string>
+    <string name="search_users">Search Users</string>
+    <string name="search_groups">Search Groups</string>
+    <string name="background_location_permission_title">Allow Background Location Permisssion</string>
+    <string name="allow_connection_service">Please enable VoIP for this app</string>
 </resources>

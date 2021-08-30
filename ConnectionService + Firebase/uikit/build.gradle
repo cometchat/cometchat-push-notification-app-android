@@ -1,10 +1,10 @@
 apply plugin: 'com.android.library'
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 29
+        minSdkVersion 24
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -81,7 +81,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 
-    implementation 'com.google.android.material:material:1.2.0-alpha04'
+    implementation 'com.google.android.material:material:1.2.0-alpha01'
 
     implementation 'com.facebook.shimmer:shimmer:0.4.0'
 
@@ -90,6 +90,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     //cometchat
-    compileOnly 'com.cometchat:pro-android-chat-sdk:2.3.5'
+    compileOnly 'com.cometchat:pro-android-chat-sdk:2.4.1'
+    compileOnly 'com.cometchat:pro-android-calls-sdk:2.1.0'
+
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.0'
 }

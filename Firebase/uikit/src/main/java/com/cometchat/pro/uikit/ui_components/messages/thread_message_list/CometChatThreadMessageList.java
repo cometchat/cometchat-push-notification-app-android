@@ -105,6 +105,7 @@ import com.cometchat.pro.uikit.ui_resources.utils.item_clickListener.OnItemClick
 import com.cometchat.pro.uikit.ui_resources.utils.keyboard_utils.KeyBoardUtils;
 import com.cometchat.pro.uikit.ui_resources.utils.sticker_header.StickyHeaderDecoration;
 import com.cometchat.pro.uikit.ui_settings.FeatureRestriction;
+import com.cometchat.pro.uikit.ui_settings.UIKitSettings;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -775,7 +776,7 @@ public class CometChatThreadMessageList extends Fragment implements View.OnClick
             Chip chip = new Chip(context);
             chip.setChipStrokeWidth(2f);
             chip.setChipBackgroundColor(ColorStateList.valueOf(context.getResources().getColor(android.R.color.transparent)));
-            chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor(FeatureRestriction.getColor())));
+            chip.setChipStrokeColor(ColorStateList.valueOf(Color.parseColor(UIKitSettings.getColor())));
             chip.setText(key + " " + reactionInfo.get(key));
             reactionLayout.addView(chip);
             chip.setOnClickListener(new View.OnClickListener() {
@@ -1118,7 +1119,17 @@ public class CometChatThreadMessageList extends Fragment implements View.OnClick
                     showPermissionSnackBar(view.findViewById(R.id.message_box), getResources().getString(R.string.grant_storage_permission));
                 break;
             case UIKitConstants.RequestCode.LOCATION:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) { }
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                     initLocation();
+//                    locationManager = (LocationManager) Objects.requireNonNull(getContext()).getSystemService(Context.LOCATION_SERVICE);
+                    boolean provider = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                    if (!provider) {
+                        turnOnLocation();
+                    }
+                    else {
+                        getLocation();
+                    }
+                }
                 else
                     showPermissionSnackBar(view.findViewById(R.id.message_box), getResources().getString(R.string.grant_location_permission));
                 break;
@@ -2696,7 +2707,7 @@ public class CometChatThreadMessageList extends Fragment implements View.OnClick
                 String messageStr = String.format(getResources().getString(R.string.shared_a_audio),
                         Utils.getFileSize(((MediaMessage) baseMessage).getAttachment().getFileSize()));
                 replyMessage.setText(messageStr);
-                replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_library_music_24dp, 0, 0, 0);
+                replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_audio, 0, 0, 0);
             } else if (baseMessage.getType().equals(CometChatConstants.MESSAGE_TYPE_VIDEO)) {
                 replyMessage.setText(getResources().getString(R.string.shared_a_video));
                 Glide.with(context).load(((MediaMessage) baseMessage).getAttachment().getFileUrl()).into(replyMedia);
@@ -2704,7 +2715,7 @@ public class CometChatThreadMessageList extends Fragment implements View.OnClick
                 String messageStr = String.format(getResources().getString(R.string.shared_a_file),
                         Utils.getFileSize(((MediaMessage) baseMessage).getAttachment().getFileSize()));
                 replyMessage.setText(messageStr);
-                replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_insert_drive_file_black_24dp, 0, 0, 0);
+                replyMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_file_upload, 0, 0, 0);
             }
             composeBox.ivSend.setVisibility(View.VISIBLE);
             replyMessageLayout.setVisibility(View.VISIBLE);

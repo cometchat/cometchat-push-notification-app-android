@@ -28,12 +28,12 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 @RequiresApi(api = Build.VERSION_CODES.M)
 public class CallConnection extends Connection {
 
-    Context context;
+    MyConnectionService service;
     Call call;
     String TAG = "CallConnection";
 
-    public CallConnection(Context context,Call call) {
-        this.context = context;
+    public CallConnection(MyConnectionService service,Call call) {
+        this.service = service;
         this.call = call;
         Log.e(TAG, "CallConnection: "+call.toString());
     }
@@ -67,7 +67,7 @@ public class CallConnection extends Connection {
 
                     @Override
                     public void onError(CometChatException e) {
-                        Toast.makeText(context,"Unable to end call due to ${p0?.code}",
+                        Toast.makeText(service,"Unable to end call due to ${p0?.code}",
                                 Toast.LENGTH_LONG).show();
                     }
                 });
@@ -80,6 +80,36 @@ public class CallConnection extends Connection {
     }
 
     @Override
+    public void onAnswer(int videoState) {
+        Log.e(TAG, "onAnswerVideo: " );
+        if (call.getSessionId()!=null) {
+            CometChat.acceptCall(call.getSessionId(), new CometChat.CallbackListener<Call>() {
+                @Override
+                public void onSuccess(Call call) {
+                    Log.e(TAG, "onSuccess: accept");
+                    service.sendBroadcast(getCallIntent("Answers"));
+//                    Intent acceptIntent = new Intent(service, CometChatStartCallActivity.class);
+//                    acceptIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID, call.getSessionId());
+//                    acceptIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    service.startActivity(acceptIntent);
+                    destroyConnection();
+                }
+
+                @Override
+                public void onError(CometChatException e) {
+                    destroyConnection();
+                    Toast.makeText(service, "Error " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onShowIncomingCallUi() {
+        Log.e(TAG, "onShowIncomingCallUi: " );
+    }
+
+    @Override
     public void onAnswer() {
         Log.i(TAG, "onAnswer"+call.getSessionId());
         if (call.getSessionId()!=null) {
@@ -87,17 +117,18 @@ public class CallConnection extends Connection {
                 @Override
                 public void onSuccess(Call call) {
                     Log.e(TAG, "onSuccess: accept");
+                    service.sendBroadcast(getCallIntent("Answers"));
+//                    Intent acceptIntent = new Intent(service, CometChatStartCallActivity.class);
+//                    acceptIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID, call.getSessionId());
+//                    acceptIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    service.startActivity(acceptIntent);
                     destroyConnection();
-                    Intent acceptIntent = new Intent(context, CometChatStartCallActivity.class);
-                    acceptIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID, call.getSessionId());
-                    acceptIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(acceptIntent);
                 }
 
                 @Override
                 public void onError(CometChatException e) {
                     destroyConnection();
-                    Toast.makeText(context, "Error " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
                 }
             });
         }
@@ -130,7 +161,6 @@ public class CallConnection extends Connection {
                 public void onError(CometChatException e) {
                     destroyConnection();
                     Log.e(TAG, "onErrorReject: "+e.getMessage());
-                    Toast.makeText(context,"ErrorReject: "+e.getMessage(),Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -140,5 +170,13 @@ public class CallConnection extends Connection {
         Log.e(TAG,"onDisconnect");
         destroyConnection();
         setDisconnected(new DisconnectCause(DisconnectCause.REMOTE, "REJECTED"));
+    }
+
+    private Intent getCallIntent(String title){
+        Intent callIntent = new Intent(service, CallNotificationAction.class);
+        callIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID,call.getSessionId());
+        callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        callIntent.setAction(title);
+        return callIntent;
     }
 }

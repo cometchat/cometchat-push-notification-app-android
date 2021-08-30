@@ -4,10 +4,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -29,6 +32,7 @@ import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.models.TextMessage;
 import com.cometchat.pro.models.User;
+import com.cometchat.pro.uikit.ui_components.calls.callconnection.CallManager;
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 import com.cometchat.pro.uikit.ui_resources.utils.CallUtils;
 import com.cometchat.pro.uikit.ui_resources.utils.MediaUtils;
@@ -56,10 +60,43 @@ public class PushNotificationActivity extends AppCompatActivity {
     private String receiver = CometChatConstants.RECEIVER_TYPE_USER;
     private TextInputLayout uidLayout;
     private ProgressDialog progressDialog;
+
+    private String[] permissions = new String[]{Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.ANSWER_PHONE_CALLS,Manifest.permission.CALL_PHONE,
+            Manifest.permission.MANAGE_OWN_CALLS,Manifest.permission.READ_PHONE_STATE};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_push_notification);
+        if (!Utils.hasPermissions(this,permissions)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(permissions,
+                        UIKitConstants.RequestCode.RECORD);
+            }
+        }
+
+        CallManager callManager = new CallManager(this);
+        if (!callManager.checkAccountConnection(this)) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+            alertDialog.setTitle("VoIP Permission");
+            alertDialog.setMessage("To make VoIP Calling work properly, you need to allow certain " +
+                    "permission from your call account settings for this app.");
+            alertDialog.setPositiveButton("Open Settings", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    callManager.launchVoIPSetting(PushNotificationActivity.this);
+                }
+            });
+            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            alertDialog.create().show();
+        }
+
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(getResources().getString(R.string.please_wait));
         progressDialog.setMessage(getResources().getString(R.string.media_uploading));

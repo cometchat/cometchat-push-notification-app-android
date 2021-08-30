@@ -2,7 +2,10 @@ package com.cometchat.pro.android.pushnotification.utils;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -19,6 +22,7 @@ import androidx.core.app.Person;
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.cometchat.pro.android.pushnotification.R;
+import com.cometchat.pro.android.pushnotification.UIKitApplication;
 import com.cometchat.pro.android.pushnotification.constants.AppConfig;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
@@ -28,6 +32,8 @@ import com.cometchat.pro.helpers.CometChatHelper;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MediaMessage;
+import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatCallActivity;
+import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatStartCallActivity;
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.helper.CometChatAudioHelper;
 import com.cometchat.pro.uikit.ui_components.calls.callconnection.CallManager;
 import com.cometchat.pro.uikit.ui_components.calls.callconnection.CallNotificationAction;
@@ -60,6 +66,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final int REQUEST_CODE = 12;
 
     private boolean isCall;
+    CallManager callManager;
+
 
     public static void subscribeUserNotification(String UID) {
         FirebaseMessaging.getInstance().subscribeToTopic(AppConfig.AppDetails.APP_ID + "_"+ CometChatConstants.RECEIVER_TYPE_USER +"_" +
@@ -183,8 +191,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     .setGroupSummary(true);
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-            if (isCall){
-                initiateCallService(call);
+            if (isCall && json.getString("alert").contains("Incoming")) {
+                if (UIKitApplication.isBackground)
+                    initiateCallService(call);
+            } else if(isCall && json.getString("alert").contains("Missed")) {
+                if (UIKitApplication.isBackground)
+                    endCallService();
+                else {
+                    if (CometChatCallActivity.callActivity != null) {
+                        CometChatCallActivity.callActivity.finish();
+                    }
+                }
             }
             else {
 //                Person person = createPerson(baseMessage);
@@ -208,9 +225,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     }
 
+    private void endCallService() {
+        if(callManager==null)
+            callManager = new CallManager(getApplicationContext());
+        callManager.endCall();
+    }
     private void initiateCallService(Call call) {
         try {
-            CallManager callManager;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 Log.e("initiateCallService: ",call.toString());
                 callManager = new CallManager(getApplicationContext());
@@ -221,13 +242,5 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Toast.makeText(getApplicationContext(), "Unable to receive call due to " +
                     e.getMessage(), Toast.LENGTH_LONG);
         }
-    }
-
-    private Intent getCallIntent(String title){
-        Intent callIntent = new Intent(getApplicationContext(), CallNotificationAction.class);
-        callIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID,call.getSessionId());
-        callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        callIntent.setAction(title);
-        return callIntent;
     }
 }

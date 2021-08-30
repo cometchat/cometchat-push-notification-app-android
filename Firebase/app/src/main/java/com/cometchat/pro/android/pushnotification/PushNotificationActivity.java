@@ -4,10 +4,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -56,10 +59,20 @@ public class PushNotificationActivity extends AppCompatActivity {
     private String receiver = CometChatConstants.RECEIVER_TYPE_USER;
     private TextInputLayout uidLayout;
     private ProgressDialog progressDialog;
+
+    private String[] permissions = new String[]{Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_push_notification);
+        if (!Utils.hasPermissions(this,permissions)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(permissions,
+                        UIKitConstants.RequestCode.RECORD);
+            }
+        }
+
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(getResources().getString(R.string.please_wait));
         progressDialog.setMessage(getResources().getString(R.string.media_uploading));

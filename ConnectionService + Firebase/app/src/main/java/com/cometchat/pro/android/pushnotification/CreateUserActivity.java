@@ -105,7 +105,7 @@ public class CreateUserActivity extends AppCompatActivity {
         CometChat.login(user.getUid(), AppConfig.AppDetails.AUTH_KEY, new CometChat.CallbackListener<User>() {
             @Override
             public void onSuccess(User user) {
-                startActivity(new Intent(CreateUserActivity.this,PushNotificationActivity.class));
+                startActivity(new Intent(CreateUserActivity.this, PushNotificationActivity.class));
             }
 
             @Override
