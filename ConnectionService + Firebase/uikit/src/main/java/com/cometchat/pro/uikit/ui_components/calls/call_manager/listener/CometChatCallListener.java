@@ -4,6 +4,8 @@ package com.cometchat.pro.uikit.ui_components.calls.call_manager.listener;
 import android.content.Context;
 import android.widget.Toast;
 
+import androidx.core.app.NotificationManagerCompat;
+
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
 import com.cometchat.pro.core.CometChat;
@@ -28,17 +30,17 @@ public class CometChatCallListener {
      * @param TAG is a unique Identifier
      * @param context is a object of Context.
      */
-    public static void addCallListener(String TAG,Context context)
+    public static void addCallListener(String TAG,Context context,boolean isForeground)
     {
         isInitialized = true;
         CometChat.addCallListener(TAG, new CometChat.CallListener() {
             @Override
             public void onIncomingCallReceived(Call call) {
                 if (CometChat.getActiveCall()==null) {
-                    if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {
+                    if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER) && isForeground) {
                         CallUtils.startCallIntent(context, (User) call.getCallInitiator(), call.getType(),
                                 false, call.getSessionId());
-                    } else {
+                    } else if (call.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_GROUP)) {
                         CallUtils.startGroupCallIntent(context, (Group) call.getReceiver(), call.getType(),
                                 false, call.getSessionId());
                     }
@@ -81,6 +83,8 @@ public class CometChatCallListener {
 
             @Override
             public void onIncomingCallCancelled(Call call){
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+                notificationManager.cancel(05);
                 if (CometChatCallActivity.callActivity!=null)
                     CometChatCallActivity.callActivity.finish();
             }

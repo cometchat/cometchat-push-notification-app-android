@@ -237,4 +237,8 @@ public class UIKitConstants {
         public static final String USE_SYSTEM_DEFAULT_KEY = "useSystemDefaults";
         public static final String EMOJI_KEY = "emojic";
     }
+
+    public class Notification {
+        public static final int ID = 05;
+    }
 }

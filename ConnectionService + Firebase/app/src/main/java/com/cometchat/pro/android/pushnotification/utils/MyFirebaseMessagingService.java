@@ -2,41 +2,27 @@ package com.cometchat.pro.android.pushnotification.utils;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.AudioManager;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
-import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.app.Person;
-import androidx.core.graphics.drawable.IconCompat;
 
 import com.cometchat.pro.android.pushnotification.R;
 import com.cometchat.pro.android.pushnotification.UIKitApplication;
 import com.cometchat.pro.android.pushnotification.constants.AppConfig;
 import com.cometchat.pro.constants.CometChatConstants;
 import com.cometchat.pro.core.Call;
-import com.cometchat.pro.core.CometChat;
-import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.helpers.CometChatHelper;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.MediaMessage;
 import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatCallActivity;
-import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatStartCallActivity;
-import com.cometchat.pro.uikit.ui_components.calls.call_manager.helper.CometChatAudioHelper;
 import com.cometchat.pro.uikit.ui_components.calls.callconnection.CallManager;
-import com.cometchat.pro.uikit.ui_components.calls.callconnection.CallNotificationAction;
 import com.cometchat.pro.uikit.ui_components.messages.message_list.CometChatMessageListActivity;
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -52,8 +38,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
-
-import static java.lang.System.currentTimeMillis;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -192,10 +176,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
             if (isCall && json.getString("alert").contains("Incoming")) {
-                if (UIKitApplication.isBackground)
+                if (!UIKitApplication.isForeground)
                     initiateCallService(call);
             } else if(isCall && json.getString("alert").contains("Missed")) {
-                if (UIKitApplication.isBackground)
+                if (!UIKitApplication.isForeground)
                     endCallService();
                 else {
                     if (CometChatCallActivity.callActivity != null) {

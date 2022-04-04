@@ -123,63 +123,29 @@ public class MyConnectionService extends ConnectionService {
 
     @Override
     public Connection onCreateOutgoingConnection(PhoneAccountHandle connectionManagerPhoneAccount, ConnectionRequest request) {
-//        Log.i("CallConnectionService", "onCreateOutgoingConnection");
-//        CallConnection conn = new CallConnection(getApplicationContext());
-//        conn.setAddress(request.getAddress(), PRESENTATION_ALLOWED);
-//        conn.setInitializing();
-//        conn.setVideoProvider(new Connection.VideoProvider() {
-//            @Override
-//            public void onSetCamera(String cameraId) {
-//
-//            }
-//
-//            @Override
-//            public void onSetPreviewSurface(Surface surface) {
-//
-//            }
-//
-//            @Override
-//            public void onSetDisplaySurface(Surface surface) {
-//
-//            }
-//
-//            @Override
-//            public void onSetDeviceOrientation(int rotation) {
-//
-//            }
-//
-//            @Override
-//            public void onSetZoom(float value) {
-//
-//            }
-//
-//            @Override
-//            public void onSendSessionModifyRequest(VideoProfile fromProfile, VideoProfile toProfile) {
-//
-//            }
-//
-//            @Override
-//            public void onSendSessionModifyResponse(VideoProfile responseProfile) {
-//
-//            }
-//
-//            @Override
-//            public void onRequestCameraCapabilities() {
-//
-//            }
-//
-//            @Override
-//            public void onRequestConnectionDataUsage() {
-//
-//            }
-//
-//            @Override
-//            public void onSetPauseImage(Uri uri) {
-//
-//            }
-//        });
-//        conn.setActive();
-//        return conn;
-        return super.onCreateOutgoingConnection(connectionManagerPhoneAccount, request);
+        Bundle bundle = request.getExtras();
+        String sessionID = bundle.getString("SESSIONID");
+        String name = bundle.getString("NAME");
+        String receiverType = bundle.getString("RECEIVERTYPE");
+        String callType = bundle.getString("CALLTYPE");
+        String receiverID = bundle.getString("RECEIVERID");
+        Log.e("onCreateOutgoingConn",bundle.toString()+" \n "+sessionID+" "+name);
+        if (receiverID!=null) {
+            Call call = new Call(receiverID, receiverType, callType);
+            call.setSessionId(sessionID);
+            conn = new CallConnection(this, call);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                conn.setConnectionProperties(Connection.PROPERTY_SELF_MANAGED);
+            }
+            conn.setCallerDisplayName(name, TelecomManager.PRESENTATION_ALLOWED);
+            conn.setAddress(request.getAddress(), TelecomManager.PRESENTATION_ALLOWED);
+            conn.setInitializing();
+            conn.setActive();
+            return conn;
+        } else {
+            String phoneNumber =bundle.getString("OriginalNumber");
+            Toast.makeText(getBaseContext(),"You tried to call "+phoneNumber,Toast.LENGTH_LONG);
+            return super.onCreateOutgoingConnection(connectionManagerPhoneAccount, request);
+        }
     }
 }

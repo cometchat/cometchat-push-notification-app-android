@@ -17,7 +17,7 @@ android {
         manifestPlaceholders = [file_provider: "com.cometchat.pro.android.pushnotification"]
 
         ndk {
-            abiFilters "armeabi-v7a", "x86"
+            abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }
     }
     dataBinding {
@@ -63,8 +63,10 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.navigation:navigation-fragment:2.0.0'
     implementation 'androidx.navigation:navigation-ui:2.0.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
+    implementation "android.arch.lifecycle:extensions:1.1.0"
 
+    //New Android X dependency is this -
+    implementation "androidx.lifecycle:lifecycle-extensions:2.0.0"
     implementation platform('com.google.firebase:firebase-bom:28.3.1')
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-crashlytics'
@@ -78,6 +80,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.0-alpha01'
     implementation 'com.facebook.shimmer:shimmer:0.4.0'
 //
-    implementation 'com.cometchat:pro-android-chat-sdk:2.4.1'
-    implementation 'com.cometchat:pro-android-calls-sdk:2.1.0'
+    implementation 'com.cometchat:pro-android-chat-sdk:3.0.4'
+    implementation 'com.cometchat:pro-android-calls-sdk:2.1.2-beta6'
 }
