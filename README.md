@@ -42,7 +42,7 @@ CometChat Push Notification Sample App is a fully functional push notification a
 3. Go to "API & Auth Keys" section and copy the `REST API` key from the "REST API Keys" tab.
 4. Go to the "Extensions" section and Enable the Push Notifications extension.
 5. Go to the "Installed" tab in the same section and open the settings for this extension and Set the version to `V2`.
-6. Also, save the `REST API` key in the Settings and click on Save.
+6. Also, save the `FCM Server key` in the Settings and click on Save.
 7. Copy the `APP_ID`, `REGION` and `AUTH_KEY` for your app.
 </br>
 
