@@ -145,8 +145,8 @@ public class CallManager {
     public void launchVoIPSetting(Context context) {
         Intent intent = new Intent();
         intent.setAction(TelecomManager.ACTION_CHANGE_PHONE_ACCOUNTS);
-                ComponentName telecomComponent = new ComponentName("com.android.server.telecom", "com.android.server.telecom.settings.EnableAccountPreferenceActivity");
-                intent.setComponent(telecomComponent);
+//                ComponentName telecomComponent = new ComponentName("com.android.server.telecom", "com.android.server.telecom.settings.EnableAccountPreferenceActivity");
+//                intent.setComponent(telecomComponent);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         context.startActivity(intent);
     }
