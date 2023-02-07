@@ -15,32 +15,28 @@
             android:text="@string/update_user"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-        <com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
-            app:border_color="@color/colorPrimary"
-            app:border_width="1dp"
-            android:layout_marginTop="32dp"
-            android:id="@+id/user_avatar"
+        <RelativeLayout
             android:layout_gravity="center"
-            android:layout_width="100dp"
-            android:layout_height="100dp"/>
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            app:boxStrokeColor="@color/colorPrimary"
-            app:boxStrokeWidth="1dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="16dp"
-            android:padding="8dp"
-            android:hint="@string/enter_avatar_url"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_marginTop="32dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:id="@+id/avatar_url_edt"
-                android:padding="8dp"
-                android:layout_height="match_parent"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
+            <com.cometchat.pro.uikit.ui_components.shared.cometchatAvatar.CometChatAvatar
+                app:border_color="@color/colorPrimary"
+                app:border_width="1dp"
+                android:layout_centerInParent="true"
+                android:id="@+id/user_avatar"
+                android:layout_width="100dp"
+                android:layout_height="100dp"/>
+            <ImageView
+                android:tint="@color/colorPrimaryDark"
+                android:id="@+id/edit_avatar"
+                android:src="@drawable/add_circle_filled"
+                android:elevation="32dp"
+                android:layout_alignBottom="@+id/user_avatar"
+                android:layout_toEndOf="@+id/user_avatar"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"/>
+        </RelativeLayout>
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             app:boxStrokeColor="@color/colorPrimary"

@@ -119,7 +119,7 @@ public class CometChatUI extends AppCompatActivity implements
         activity = this;
         CometChatError.init(this);
         if (!CometChatCallListener.isInitialized)
-            CometChatCallListener.addCallListener(TAG,this);
+            CometChatCallListener.addCallListener(TAG,this,true);
 
         EmojiCompat.Config config = new BundledEmojiCompatConfig(getApplicationContext());
         EmojiCompat.init(config);

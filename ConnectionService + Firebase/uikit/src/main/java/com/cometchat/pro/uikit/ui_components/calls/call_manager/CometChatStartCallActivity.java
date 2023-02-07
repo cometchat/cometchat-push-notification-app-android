@@ -1,11 +1,13 @@
 package com.cometchat.pro.uikit.ui_components.calls.call_manager;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.Build;
@@ -67,6 +69,8 @@ public class CometChatStartCallActivity extends AppCompatActivity {
 
     private boolean isDefaultCall;
 
+    private CallManager callManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +100,9 @@ public class CometChatStartCallActivity extends AppCompatActivity {
 
         CometChatError.init(this);
         Log.e( "startCallActivity: ",sessionID+" "+type);
+
+        callManager = CallManager.getInstance();
+
         CometChat.startCall(callSettings, new CometChat.OngoingCallListener() {
             @Override
             public void onUserListUpdated(List<User> list) {
@@ -123,9 +130,7 @@ public class CometChatStartCallActivity extends AppCompatActivity {
                             mainView, getString(R.string.user_left)+":"+ user.getName(),
                             CometChatSnackBar.INFO);
                     Log.e("onUserLeft: ", user.getUid());
-                    if (callSettings.getMode().equals(CallSettings.MODE_SINGLE)) {
-                        endCall();
-                    }
+
                 } else {
                     Log.e( "onUserLeft: ","triggered" );
                 }
@@ -144,6 +149,10 @@ public class CometChatStartCallActivity extends AppCompatActivity {
                 stopService(mServiceIntent);
                 Log.e("TAG", "onCallEnded: ");
                 finish();
+                PackageManager manager = getPackageManager();
+                Intent i = manager.getLaunchIntentForPackage(getPackageName());
+                i.addCategory(Intent.CATEGORY_LAUNCHER);
+                startActivity(i);
             }
         });
     }
@@ -158,29 +167,5 @@ public class CometChatStartCallActivity extends AppCompatActivity {
         }
         Log.i("isMyServiceRunning: ","Not Running");
         return false;
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (type!=null && type.equalsIgnoreCase(CometChatConstants.RECEIVER_TYPE_GROUP)) {
-            endCall();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    private void endCall() {
-        CometChat.endCall(sessionID, new CometChat.CallbackListener<Call>() {
-            @Override
-            public void onSuccess(Call call) {
-                finish();
-            }
-
-            @Override
-            public void onError(CometChatException e) {
-                CometChatSnackBar.show(CometChatStartCallActivity.this,
-                        mainView, CometChatError.localized(e), CometChatSnackBar.ERROR);
-            }
-        });
     }
 }

@@ -22,6 +22,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <TextView
+        android:gravity="center_vertical"
+        android:textStyle="bold"
+        style="@style/TextAppearance.AppCompat.Medium"
+        android:id="@+id/launch_settings"
+        android:text="Open VoIP Settings"
+        android:layout_margin="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
         android:drawableTint="@color/red"
         android:gravity="center_vertical"
         android:drawablePadding="8dp"

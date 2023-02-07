@@ -23,38 +23,30 @@ public class CallNotificationAction extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String sessionID = intent.getStringExtra(UIKitConstants.IntentStrings.SESSION_ID);
         Log.e(TAG, "onReceive: " + intent.getStringExtra(UIKitConstants.IntentStrings.SESSION_ID));
-        if (intent.getAction().equals("Answers")) {
-            Log.e(TAG, "onReceive: Answers" );
-//            CometChat.acceptCall(sessionID, new CometChat.CallbackListener<Call>() {
-//                @Override
-//                public void onSuccess(Call call) {
+        if (intent.getAction().equals("Answer_")) {
+            CometChat.acceptCall(sessionID, new CometChat.CallbackListener<Call>() {
+                @Override
+                public void onSuccess(Call call) {
                     Intent acceptIntent = new Intent(context, CometChatStartCallActivity.class);
                     acceptIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID,sessionID);
                     acceptIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     acceptIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(acceptIntent);
-//                }
-//
-//                @Override
-//                public void onError(CometChatException e) {
-//                    Toast.makeText(context,"Error "+e.getMessage(),Toast.LENGTH_LONG).show();
-//                }
-//            });
-//            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-//            notificationManager.cancel(05);
-        } else if (intent.getAction().equals("StartCall")){
-            Intent acceptIntent = new Intent(context, CometChatStartCallActivity.class);
-            acceptIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID,sessionID);
-            acceptIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(acceptIntent);
-        }
-        else {
-            Log.e(TAG, "onReceive: Reject" );
+                }
+
+                @Override
+                public void onError(CometChatException e) {
+                    Toast.makeText(context,"Error "+e.getMessage(),Toast.LENGTH_LONG).show();
+                }
+            });
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+            notificationManager.cancel(UIKitConstants.Notification.ID);
+        } else if(intent.getAction().equals("Decline_")) {
             CometChat.rejectCall(sessionID, CometChatConstants.CALL_STATUS_REJECTED, new CometChat.CallbackListener<Call>() {
                 @Override
                 public void onSuccess(Call call) {
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-                    notificationManager.cancel(05);
+                    notificationManager.cancel(UIKitConstants.Notification.ID);
                     if (CometChatCallActivity.callActivity!=null)
                         CometChatCallActivity.callActivity.finish();
                 }
@@ -64,6 +56,14 @@ public class CallNotificationAction extends BroadcastReceiver {
                     Toast.makeText(context,"Error: "+e.getMessage(),Toast.LENGTH_LONG).show();
                 }
             });
+        } else if (intent.getAction().equals("StartCall")) {
+            Log.e(TAG, "onReceive: StartCall" );
+
+            Intent acceptIntent = new Intent(context, CometChatStartCallActivity.class);
+            acceptIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID,sessionID);
+            acceptIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            acceptIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            context.startActivity(acceptIntent);
         }
     }
 }

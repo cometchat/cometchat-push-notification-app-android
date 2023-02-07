@@ -87,11 +87,7 @@ public class CallConnection extends Connection {
                 @Override
                 public void onSuccess(Call call) {
                     Log.e(TAG, "onSuccess: accept");
-                    service.sendBroadcast(getCallIntent("Answers"));
-//                    Intent acceptIntent = new Intent(service, CometChatStartCallActivity.class);
-//                    acceptIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID, call.getSessionId());
-//                    acceptIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    service.startActivity(acceptIntent);
+                    service.sendBroadcast(getCallIntent("StartCall"));
                     destroyConnection();
                 }
 
@@ -117,11 +113,7 @@ public class CallConnection extends Connection {
                 @Override
                 public void onSuccess(Call call) {
                     Log.e(TAG, "onSuccess: accept");
-                    service.sendBroadcast(getCallIntent("Answers"));
-//                    Intent acceptIntent = new Intent(service, CometChatStartCallActivity.class);
-//                    acceptIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID, call.getSessionId());
-//                    acceptIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    service.startActivity(acceptIntent);
+                    service.sendBroadcast(getCallIntent("StartCall"));
                     destroyConnection();
                 }
 

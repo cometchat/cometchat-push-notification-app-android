@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import com.cometchat.pro.android.pushnotification.utils.MyFirebaseMessagingService;
 import com.cometchat.pro.core.CometChat;
 import com.cometchat.pro.exceptions.CometChatException;
+import com.cometchat.pro.uikit.ui_components.calls.callconnection.CallManager;
 import com.cometchat.pro.uikit.ui_components.cometchat_ui.CometChatUI;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -76,6 +77,13 @@ public class MoreActionFragment extends BottomSheetDialogFragment {
             }
         });
 
+        view.findViewById(R.id.launch_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CallManager callManager = new CallManager(requireContext());
+                callManager.launchVoIPSetting(requireContext());
+            }
+        });
         launchUI = view.findViewById(R.id.launch_ui_kit);
         launchUI.setOnClickListener(new View.OnClickListener() {
             @Override

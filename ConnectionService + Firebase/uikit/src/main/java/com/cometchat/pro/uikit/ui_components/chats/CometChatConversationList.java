@@ -407,8 +407,6 @@ public class CometChatConversationList extends Fragment implements TextWatcher, 
         CometChat.addMessageListener(TAG, new CometChat.MessageListener() {
             @Override
             public void onTextMessageReceived(TextMessage message) {
-                if (!message.getSender().getUid().equalsIgnoreCase(CometChat.getLoggedInUser().getUid()))
-                    CometChat.markAsDelivered(message);
                 if (rvConversationList!=null) {
                     rvConversationList.refreshConversation(message);
                     checkNoConverstaion();
@@ -417,8 +415,6 @@ public class CometChatConversationList extends Fragment implements TextWatcher, 
 
             @Override
             public void onMediaMessageReceived(MediaMessage message) {
-                if (!message.getSender().getUid().equalsIgnoreCase(CometChat.getLoggedInUser().getUid()))
-                    CometChat.markAsDelivered(message);
                 if (rvConversationList != null) {
                     rvConversationList.refreshConversation(message);
                     checkNoConverstaion();
@@ -427,8 +423,6 @@ public class CometChatConversationList extends Fragment implements TextWatcher, 
 
             @Override
             public void onCustomMessageReceived(CustomMessage message) {
-                if (!message.getSender().getUid().equalsIgnoreCase(CometChat.getLoggedInUser().getUid()))
-                    CometChat.markAsDelivered(message);
                 if (rvConversationList != null) {
                     rvConversationList.refreshConversation(message);
                     checkNoConverstaion();

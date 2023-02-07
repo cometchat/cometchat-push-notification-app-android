@@ -1,6 +1,7 @@
 package com.cometchat.pro.uikit.ui_components.calls.callconnection;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,8 @@ import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.cometchat.pro.constants.CometChatConstants;
@@ -29,6 +32,7 @@ import com.cometchat.pro.models.Group;
 import com.cometchat.pro.models.User;
 import com.cometchat.pro.uikit.BuildConfig;
 import com.cometchat.pro.uikit.R;
+import com.cometchat.pro.uikit.ui_components.calls.call_manager.CometChatCallActivity;
 import com.cometchat.pro.uikit.ui_resources.constants.UIKitConstants;
 import com.cometchat.pro.uikit.ui_settings.UIKitSettings;
 
@@ -110,23 +114,32 @@ public class CallManager {
                 telecomManager.addNewIncomingCall(phoneAccountHandle, extras);
             } catch (SecurityException e) {
                 e.printStackTrace();
-                CometChat.rejectCall(call.getSessionId(), CometChatConstants.CALL_STATUS_BUSY, new CometChat.CallbackListener<Call>() {
-                    @Override
-                    public void onSuccess(Call call) {
-                        Toast.makeText(context, context.getString(R.string.allow_connection_service), Toast.LENGTH_LONG).show();
-                        launchVoIPSetting(context);
-                    }
-
-                    @Override
-                    public void onError(CometChatException e) {
-
-                    }
-                });
-
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(context,"2")
+                        .setSmallIcon(R.drawable.cc)
+                        .setContentTitle(((User) call.getCallInitiator()).getName())
+                        .setContentText(call.getCallStatus().toUpperCase()+" "
+                                +call.getType().toUpperCase()+" "+context.getString(R.string.call))
+                        .setColor(context.getColor(R.color.colorPrimary))
+                        .setGroup("group_id")
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+                builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+                builder.setCategory(NotificationCompat.CATEGORY_CALL);
+                builder.addAction(0, "Answers", PendingIntent.getBroadcast(context.getApplicationContext(), 0, getCallIntent("Answer_",call), PendingIntent.FLAG_UPDATE_CURRENT));
+                builder.addAction(0, "Decline", PendingIntent.getBroadcast(context.getApplicationContext(), 1, getCallIntent("Decline_",call), PendingIntent.FLAG_UPDATE_CURRENT));
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+                notificationManager.notify(UIKitConstants.Notification.ID,builder.build());
             } catch (Exception e) {
                 Log.e("CallManagerError: ", e.getMessage());
             }
         }
+    }
+
+    private Intent getCallIntent(String title,Call call){
+        Intent callIntent = new Intent(context.getApplicationContext(), CallNotificationAction.class);
+        callIntent.putExtra(UIKitConstants.IntentStrings.SESSION_ID,call.getSessionId());
+        callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        callIntent.setAction(title);
+        return callIntent;
     }
 
     public void launchVoIPSetting(Context context) {
