@@ -29,20 +29,6 @@ public class UIKitApplication extends Application implements LifecycleObserver {
     @Override
     public void onCreate() {
         super.onCreate();
-        AppSettings appSettings = new AppSettings.AppSettingsBuilder().subscribePresenceForAllUsers().setRegion(AppConfig.AppDetails.REGION).build();
-        CometChat.init(this, AppConfig.AppDetails.APP_ID, appSettings, new CometChat.CallbackListener<String>() {
-            @Override
-            public void onSuccess(String s) {
-                CometChat.setSource("push-notification","android","java");
-                Log.d(TAG, "onSuccess: "+s);
-            }
-
-            @Override
-            public void onError(CometChatException e) {
-                Toast.makeText(UIKitApplication.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
         createNotificationChannel();
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
@@ -50,18 +36,19 @@ public class UIKitApplication extends Application implements LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     public void onMoveToForeground() {
-        isForeground =true;
+        isForeground = true;
         CometChat.removeCallListener(TAG);
-        CometChatCallListener.addCallListener(TAG,this,isForeground);
+        CometChatCallListener.addCallListener(TAG, this, isForeground);
+        CometChat.connect();
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     public void onMoveToBackground() {
         isForeground = false;
         CometChat.removeCallListener(TAG);
-        CometChatCallListener.addCallListener(TAG,this,isForeground);
+        CometChatCallListener.addCallListener(TAG, this, isForeground);
+        CometChat.disconnect();
     }
-
 
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
