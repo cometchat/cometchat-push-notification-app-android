@@ -16,7 +16,10 @@ import com.cometchat.pro.android.pushnotification.R;
 import com.cometchat.pro.android.pushnotification.UIKitApplication;
 import com.cometchat.pro.android.pushnotification.constants.AppConfig;
 import com.cometchat.pro.constants.CometChatConstants;
+import com.cometchat.pro.core.AppSettings;
 import com.cometchat.pro.core.Call;
+import com.cometchat.pro.core.CometChat;
+import com.cometchat.pro.exceptions.CometChatException;
 import com.cometchat.pro.helpers.CometChatHelper;
 import com.cometchat.pro.models.BaseMessage;
 import com.cometchat.pro.models.Group;
@@ -133,6 +136,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         try {
             int m = (int) ((new Date().getTime()));
             String GROUP_ID = "group_id";
+            if (!CometChat.isInitialized()) {
+                AppSettings appSettings = new AppSettings.AppSettingsBuilder().autoEstablishSocketConnection(false).setRegion(AppConfig.AppDetails.REGION).build();
+                CometChat.init(this, AppConfig.AppDetails.APP_ID, appSettings, new CometChat.CallbackListener<String>() {
+                    @Override
+                    public void onSuccess(String s) {
+                        CometChat.setSource("push-notification", "android", "java");
+                        Log.d(TAG, "onSuccess: " + s);
+                    }
+
+                    @Override
+                    public void onError(CometChatException e) {
+                        e.getMessage();
+                    }
+                });
+            }
             Intent messageIntent = new Intent(getApplicationContext(), CometChatMessageListActivity.class);
             messageIntent.putExtra(UIKitConstants.IntentStrings.TYPE, baseMessage.getReceiverType());
             if (baseMessage.getReceiverType().equals(CometChatConstants.RECEIVER_TYPE_USER)) {

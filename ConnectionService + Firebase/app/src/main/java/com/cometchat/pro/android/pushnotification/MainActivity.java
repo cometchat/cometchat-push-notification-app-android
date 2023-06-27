@@ -46,97 +46,115 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (CometChat.getLoggedInUser()!=null)
-            startActivity(new Intent(MainActivity.this, PushNotificationActivity.class));
+//        if (CometChat.getLoggedInUser() != null)
+//            startActivity(new Intent(MainActivity.this, PushNotificationActivity.class));
+        AppSettings appSettings = new AppSettings.AppSettingsBuilder().subscribePresenceForAllUsers().setRegion(AppConfig.AppDetails.REGION).build();
+        CometChat.init(this, AppConfig.AppDetails.APP_ID, appSettings, new CometChat.CallbackListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                CometChat.setSource("push-notification", "android", "java");
+                Log.d(TAG, "onSuccess: " + s);
+                if (CometChat.getLoggedInUser() != null)
+                    startActivity(new Intent(MainActivity.this, PushNotificationActivity.class));
+            }
+            @Override
+            public void onError(CometChatException e) {
+                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
         loginBtn = findViewById(R.id.login);
         superhero1 = findViewById(R.id.superhero1);
         superhero2 = findViewById(R.id.superhero2);
         superhero3 = findViewById(R.id.superhero3);
         superhero4 = findViewById(R.id.superhero4);
         ivLogo = findViewById(R.id.ivLogo);
+
+
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-                public void onClick(View view) {
-                    startActivity(new Intent(MainActivity.this,LoginActivity.class));
-                }
-            });
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+            }
+        });
 
         superhero1.setOnClickListener(view -> {
-                findViewById(R.id.superhero1_progressbar).setVisibility(View.VISIBLE);
-                login("superhero1");
+            findViewById(R.id.superhero1_progressbar).setVisibility(View.VISIBLE);
+            login("superhero1");
         });
         superhero2.setOnClickListener(view -> {
-                findViewById(R.id.superhero2_progressbar).setVisibility(View.VISIBLE);
-                login("superhero2");
+            findViewById(R.id.superhero2_progressbar).setVisibility(View.VISIBLE);
+            login("superhero2");
         });
         superhero3.setOnClickListener(view -> {
-                findViewById(R.id.superhero3_progressbar).setVisibility(View.VISIBLE);
-                login("superhero3");
+            findViewById(R.id.superhero3_progressbar).setVisibility(View.VISIBLE);
+            login("superhero3");
         });
         superhero4.setOnClickListener(view -> {
-                findViewById(R.id.superhero4_progressbar).setVisibility(View.VISIBLE);
-                login("superhero4");
+            findViewById(R.id.superhero4_progressbar).setVisibility(View.VISIBLE);
+            login("superhero4");
         });
 
-        if(Utils.isDarkMode(this)) {
+        if (Utils.isDarkMode(this)) {
             ivLogo.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.textColorWhite)));
-        }
-        else {
+        } else {
             ivLogo.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.primaryTextColor)));
         }
     }
 
     private void login(String uid) {
-        CometChat.login(uid, AppConfig.AppDetails.AUTH_KEY, new CometChat.CallbackListener<User>() {
-            @Override
-            public void onSuccess(User user) {
-                token = MyFirebaseMessagingService.token;
-                if (token==null) {
-                    FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-                        @Override
-                        public void onComplete(@NonNull Task<String> task) {
-                            if (!task.isSuccessful()) {
-                                Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                                return;
+        if (CometChat.isInitialized()) {
+            CometChat.login(uid, AppConfig.AppDetails.AUTH_KEY, new CometChat.CallbackListener<User>() {
+                @Override
+                public void onSuccess(User user) {
+                    token = MyFirebaseMessagingService.token;
+                    if (token == null) {
+                        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                            @Override
+                            public void onComplete(@NonNull Task<String> task) {
+                                if (!task.isSuccessful()) {
+                                    Toast.makeText(MainActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+                                token = task.getResult();
+                                Log.e(TAG, "onComplete: " + token);
+                                registerPushNotification(uid, token);
                             }
-                            token = task.getResult();
-                            Log.e(TAG, "onComplete: "+token);
-                            registerPushNotification(uid,token);
-                        }
-                    });
-                } else {
-                    registerPushNotification(uid,token);
+                        });
+                    } else {
+                        registerPushNotification(uid, token);
+                    }
+
                 }
 
-            }
-
-            @Override
-            public void onError(CometChatException e) {
-                String str = uid+"_progressbar";
-                int id = getResources().getIdentifier(str,"id",getPackageName());
-                findViewById(id).setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onError(CometChatException e) {
+                    String str = uid + "_progressbar";
+                    int id = getResources().getIdentifier(str, "id", getPackageName());
+                    findViewById(id).setVisibility(View.GONE);
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
-    private void registerPushNotification(String uid,String token) {
-        Log.e(TAG, "onComplete: "+token);
+    private void registerPushNotification(String uid, String token) {
+        Log.e(TAG, "onComplete: " + token);
         CometChat.registerTokenForPushNotification(token, new CometChat.CallbackListener<String>() {
             @Override
             public void onSuccess(String s) {
-                Toast.makeText(MainActivity.this,s,Toast.LENGTH_LONG).show();
-                Log.e( "onSuccessPN: ",s );
+                Toast.makeText(MainActivity.this, s, Toast.LENGTH_LONG).show();
+                Log.e("onSuccessPN: ", s);
             }
 
             @Override
             public void onError(CometChatException e) {
-                Log.e("onErrorPN: ",e.getMessage() );
+                Log.e("onErrorPN: ", e.getMessage());
                 Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-        String str = uid+"_progressbar";
-        int id = getResources().getIdentifier(str,"id",getPackageName());
+        String str = uid + "_progressbar";
+        int id = getResources().getIdentifier(str, "id", getPackageName());
         findViewById(id).setVisibility(View.GONE);
         startActivity(new Intent(MainActivity.this, PushNotificationActivity.class));
     }

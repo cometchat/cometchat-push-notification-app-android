@@ -263,7 +263,7 @@ public class CometChatMessageList extends Fragment implements View.OnClickListen
 
     private FontUtils fontUtils;
 
-    private User loggedInUser = CometChat.getLoggedInUser();
+    private User loggedInUser ;
 
     String[] CAMERA_PERMISSION = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
@@ -387,7 +387,7 @@ public class CometChatMessageList extends Fragment implements View.OnClickListen
     private void initViewComponent(View view) {
 
         setHasOptionsMenu(true);
-
+        loggedInUser = CometChat.getLoggedInUser();
         CometChatError.init(getContext());
         backIcon = view.findViewById(R.id.back_action);
         infoAction = view.findViewById(R.id.info_action);

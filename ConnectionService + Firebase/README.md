@@ -42,9 +42,9 @@ CometChat Push Notification Sample App is a fully functional push notification a
 ## Pre-requisite :star:
 1. Login to the <a href="https://app.cometchat.io/" target="_blank">CometChat Dashboard</a>.
 2. Select an existing app or create a new one.
-3. Go to "API & Auth Keys" section and copy the `REST API` key from the "REST API Keys" tab.
+3. Go to credentials section and copy the `Auth` key from the credentials tab.
 4. Go to the "Extensions" section and Enable the Push Notifications extension.
-5. Go to the "Installed" tab in the same section and open the settings for this extension and Set the version to `V2`.
+5. Go to the "Installed" tab in the same section and open the settings for this extension and Set the version to Token-based(V2).
 6. Also, save the `REST API` key in the Settings and click on Save.
 7. Copy the `APP_ID`, `REGION` and `AUTH_KEY` for your app.
 </br>
@@ -110,6 +110,7 @@ ConnectionService is an abstract service used to handle VoIP & other calls. It i
 
 Thanks to the following people who have contributed to this project:
 
+[👨‍💻 @vivekprajapati 💻](https://github.com/vivekCometChat) <br>
 [👨‍💻 @darshanbhanushali 💻](https://github.com/darshanbhanushali) <br>
 
 [Contribution guidelines for this project](CONTRIBUTING.md)
